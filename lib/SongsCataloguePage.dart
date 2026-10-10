@@ -34,7 +34,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final albumCoverSize = screenWidth*0.2*0.95;
+    final albumCoverSize = 240.0; // 300px is the width of every card so we give it a little margin
 
 
     return ValueListenableBuilder(
@@ -134,26 +134,51 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                         final song = listOfSongs[index];
                       
                         return SizedBox(
-                          width: screenWidth*0.25,
+                          width: 300,
                           child: Card(
                             child: Padding(
                               padding: EdgeInsetsGeometry.symmetric(
-                                vertical: screenHeight*0.01,
-                                horizontal: screenWidth*0.01
+                                vertical: 12,
+                                horizontal: 300*0.05
                               ),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
 
                                 // ALBUM COVER
-                                song.cover == null ? SvgPicture.asset("assets/images/heart.svg", width: albumCoverSize) : Image.memory(song.cover!, width: albumCoverSize),
+                                if (song.cover == null)
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: SvgPicture.asset("assets/images/heart.svg", width: albumCoverSize)
+                                  )
+                                else
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.memory(song.cover!, width: albumCoverSize)
+                                  ),
+
+                                // a little margin in between
+                                SizedBox(height: screenHeight*0.6*0.08),
                                 
                                 // NAME + ARTIST NAME
-                                Column(children: [
-                                  Text(song.name),
-                                  Text(song.artist)
-                                ],)
-                              ],),
+                                Text(
+                                  song.name,
+
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: nameSize,
+                                  ),
+                                ),
+
+                                Text(
+                                  song.artist,
+
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: artistSize,
+                                  ),
+                                )
+                              ],)
                             ),
                           ),
                         );
