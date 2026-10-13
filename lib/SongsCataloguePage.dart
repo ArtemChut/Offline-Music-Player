@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:music_player/sideFiles/consts/notifiers.dart';
@@ -6,7 +7,7 @@ import 'sideFiles/bottomNavBar.dart';
 import 'SettingsPage.dart';
 import 'StatisticsPage.dart';
 import 'sideFiles/consts/styles.dart';
-import 'sideFiles/importFiles.dart';
+import 'sideFiles/loadNotifiers.dart';
 
 class SongsCataloguePage extends StatefulWidget {
   const SongsCataloguePage({super.key});
@@ -16,15 +17,33 @@ class SongsCataloguePage extends StatefulWidget {
 }
 
 class _SongsCatalogueState extends State<SongsCataloguePage> {
+  final ScrollController _scrollController = ScrollController();
+
+  final double albumCoverSize = 240.0; // 300px is the width of every card so we give it a little margin
+  final double cardWidth = 300;
+
+  int? currentSongIndex;
+  
 
   @override
   void initState() {
     super.initState();
-    initLoadNotifier();
+    initLoadData();
   }
+
+  Future<void> initLoadData() async {
+    await initLoadSongsList();
+    await initLoadCurrSong();
+    if (currentSongNotifier.value == null) {print(loadedSongsNotifier.value[currentSongIndex!]);}
+
+    currentSongIndex = currentSongNotifier.value;
+  }
+
+
 
   @override
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -33,8 +52,6 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
 
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
-    final albumCoverSize = 240.0; // 300px is the width of every card so we give it a little margin
 
 
     return ValueListenableBuilder(
@@ -123,66 +140,95 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                       return Center(child: Text("nooooo, add some songs!!"));
                     }
 
-                    return ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false), // removing a scrollbar thingy on the side
-
-                      child: ListView.builder(
-                        itemCount: listOfSongs.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-
-                        final song = listOfSongs[index];
-                      
-                        return SizedBox(
-                          width: 300,
-                          child: Card(
-                            child: Padding(
-                              padding: EdgeInsetsGeometry.symmetric(
-                                vertical: 12,
-                                horizontal: 300*0.05
+                    return Listener(
+                        onPointerSignal: (event) {
+                          if (event is PointerScrollEvent && _scrollController.hasClients){
+                            _scrollController.jumpTo((_scrollController.offset + (event.scrollDelta.dy > 0 ? cardWidth : -cardWidth))
+                              .clamp(
+                                0.0,
+                                _scrollController.position.maxScrollExtent,
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
+                            );
+                          }
+                        },
 
-                                // ALBUM COVER
-                                if (song.cover == null)
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: SvgPicture.asset("assets/images/heart.svg", width: albumCoverSize)
-                                  )
-                                else
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.memory(song.cover!, width: albumCoverSize)
+                        // the cards themself
+                        child: ListView.builder(
+                          itemCount: listOfSongs.length,
+                          scrollDirection: Axis.horizontal,
+                          controller: _scrollController,
+                          itemBuilder: (context, index) {
+
+                        
+                          final song = listOfSongs[index];
+
+                        
+                          return GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                if (currentSongIndex != null){
+                                  loadedSongsNotifier.value[currentSongIndex!].isPlaying = false;
+                                }
+                                currentSongIndex = index;
+                                loadedSongsNotifier.value[currentSongIndex!].isPlaying = true;
+
+                              });
+                              await saveCurrSong(index);
+                            },
+        
+                            child: SizedBox(
+                              width: cardWidth,
+                              child: Card(
+                                color: index == currentSongIndex ? Colors.deepOrange : Colors.lightGreenAccent,
+
+                                child: Padding(
+                                  padding: EdgeInsetsGeometry.symmetric(
+                                    vertical: 12,
+                                    horizontal: cardWidth*0.05
                                   ),
-
-                                // a little margin in between
-                                SizedBox(height: screenHeight*0.6*0.08),
-                                
-                                // NAME + ARTIST NAME
-                                Text(
-                                  song.name,
-
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: nameSize,
-                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                                    
+                                    // ALBUM COVER
+                                    if (song.cover == null)
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: SvgPicture.asset("assets/images/heart.svg", width: albumCoverSize)
+                                      )
+                                    else
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.memory(song.cover!, width: albumCoverSize)
+                                      ),
+                                                    
+                                    // a little margin in between
+                                    SizedBox(height: screenHeight*0.6*0.08),
+                                    
+                                    // NAME + ARTIST NAME
+                                    Text(
+                                      song.name,
+                                                    
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: nameSize,
+                                      ),
+                                    ),
+                                                    
+                                    Text(
+                                      song.artist,
+                                                    
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: artistSize,
+                                      ),
+                                    ),
+                                  ],)
                                 ),
-
-                                Text(
-                                  song.artist,
-
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: artistSize,
-                                  ),
-                                )
-                              ],)
+                              ),
                             ),
-                          ),
-                        );
-                      },),
+                          );
+                        },),
                     );
                   },
                 ),

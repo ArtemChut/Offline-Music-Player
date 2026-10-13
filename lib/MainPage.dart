@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'sideFiles/consts/constants.dart';
 import 'sideFiles/consts/notifiers.dart';
 import 'sideFiles/savingPrefs.dart';
+import 'sideFiles/songs.dart';
 import 'SongsCataloguePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'sideFiles/loadNotifiers.dart';
 
 
 
@@ -17,6 +20,12 @@ Future<void> clearSongs() async {
   await prefs.remove(KConstant.loadedSongsKey);
 }
 
+Future<void> clearCurr() async {
+  currentSongNotifier.value = null;
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(KConstant.currentSongKey);
+}
+
 // SETTING THE THEME OF OUR BACKGROUND
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +35,29 @@ void main() async {
   isFirstView.value = prefs.getBool(KConstant.firstViewKey) ?? true;
 
   //clearSongs(); // for debugging purposes
+  //clearCurr();
 
   // loading a theme colour
   isLightModeNotifier.value = prefs.getBool(KConstant.themeModeKey) ?? false;
+
+  
+  // REMOVING A SONG IF PATH IS INVALID
+  if (!isFirstView.value) {
+    await initLoadSongsList();
+
+    final songs = loadedSongsNotifier.value;
+    final validSongs = <Song>[];
+
+    for (final song in songs) {
+      if (await File(song.path).exists()) {
+        validSongs.add(song);
+      }
+    }
+
+    loadedSongsNotifier.value = validSongs;
+
+    await saveAllSongs();
+  }
   
 
   runApp(

@@ -1,7 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
 import 'consts/constants.dart';
 import 'consts/notifiers.dart';
+
 
 
 // SAVING PREFS OF OUR BACKGROUND COLOUR
@@ -17,5 +19,17 @@ Future<void> saveAllSongs() async {
   await prefs.setString(
     KConstant.loadedSongsKey,
     jsonEncode(loadedSongsNotifier.value.map((song) => song.toJson()).toList())
+  );
+}
+
+
+Future<void> saveCurrSong(currentSongIndex) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  if (currentSongIndex == null) return;
+
+  await prefs.setInt(
+    KConstant.currentSongKey,
+    currentSongIndex
   );
 }

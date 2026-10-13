@@ -1,28 +1,10 @@
 import 'dart:io';
-import 'dart:convert';
-
-import 'consts/constants.dart';
 import 'consts/notifiers.dart';
 import 'songs.dart';
 import 'savingPrefs.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-
-
-// GETTING A LIST FROM A CONST VALUENOTIFIER
-Future<void> initLoadNotifier() async {
-  final prefs = await SharedPreferences.getInstance();
-
-  final jsonString = prefs.getString(KConstant.loadedSongsKey);
-  if (jsonString == null) return;
-
-  final List<dynamic> decoded = jsonDecode(jsonString);
-
-  loadedSongsNotifier.value = decoded.map((e) => Song.fromJson(e)).toList();
-}
 
 
 String songName(String name) {
