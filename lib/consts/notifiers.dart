@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../songs.dart';
+import '../sideFiles/songs.dart';
 
 
 ValueNotifier<bool> isLightModeNotifier = ValueNotifier(false); // whether the theme mode is light or dark

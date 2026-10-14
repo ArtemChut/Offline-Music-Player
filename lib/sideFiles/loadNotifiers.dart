@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'consts/constants.dart';
-import 'consts/notifiers.dart';
+import '../consts/constants.dart';
+import '../consts/notifiers.dart';
 
 import 'songs.dart';
 

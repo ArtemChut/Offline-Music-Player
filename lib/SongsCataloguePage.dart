@@ -1,12 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:music_player/sideFiles/consts/notifiers.dart';
+import 'package:music_player/consts/notifiers.dart';
 import 'sideFiles/savingPrefs.dart';
 import 'sideFiles/bottomNavBar.dart';
 import 'SettingsPage.dart';
 import 'StatisticsPage.dart';
-import 'sideFiles/consts/styles.dart';
+import 'consts/styles.dart';
 import 'sideFiles/loadNotifiers.dart';
 
 class SongsCataloguePage extends StatefulWidget {
@@ -23,6 +23,23 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
   final double cardWidth = 300;
 
   int? currentSongIndex;
+
+
+  Color? cardColour;
+  Color? selectedCardColour;
+  Color? cardBackgroundColour;
+  void loadColours(){
+    if (isLightModeNotifier.value){
+      cardColour = Colors.white;
+      selectedCardColour = Colors.white70;
+      cardBackgroundColour = const Color.fromARGB(255, 244, 244, 244);
+    }
+    else{
+      cardColour = const Color.fromARGB(13, 0, 0, 0);
+      selectedCardColour = Colors.black;
+      cardBackgroundColour = Colors.black26;
+    }
+  }
   
 
   @override
@@ -34,9 +51,10 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
   Future<void> initLoadData() async {
     await initLoadSongsList();
     await initLoadCurrSong();
-    if (currentSongNotifier.value == null) {print(loadedSongsNotifier.value[currentSongIndex!]);}
 
     currentSongIndex = currentSongNotifier.value;
+
+    //await checkDeletedSongs(); 1 second man, not done
   }
 
 
@@ -54,9 +72,11 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
     final screenWidth = MediaQuery.of(context).size.width;
 
 
+
     return ValueListenableBuilder(
       valueListenable: isLightModeNotifier,
       builder: (context, isLightMode, child) {
+        loadColours(); // changes colour of cards if the theme colour changes
         // APPBAR
         return Scaffold(
           appBar: AppBar(
@@ -119,6 +139,8 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
             vertical: screenHeight/23,
             horizontal: screenWidth/20
           ),
+
+
             child: Center(
               // EVRYTHING INSIDE THE PAGE
               child: Container(
@@ -129,7 +151,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                   vertical: screenHeight*0.05
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.red,
+                  color: cardBackgroundColour,
                   borderRadius: BorderRadius.circular(20) 
                 ),
                 
@@ -179,7 +201,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                             child: SizedBox(
                               width: cardWidth,
                               child: Card(
-                                color: index == currentSongIndex ? Colors.deepOrange : Colors.lightGreenAccent,
+                                color: index == currentSongIndex ? selectedCardColour : cardColour,
 
                                 child: Padding(
                                   padding: EdgeInsetsGeometry.symmetric(

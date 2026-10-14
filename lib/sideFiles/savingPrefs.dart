@@ -1,8 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-import 'consts/constants.dart';
-import 'consts/notifiers.dart';
+import '../consts/constants.dart';
+import '../consts/notifiers.dart';
 
 
 

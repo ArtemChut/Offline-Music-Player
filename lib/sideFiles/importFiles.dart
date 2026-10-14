@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'consts/notifiers.dart';
+import '../consts/notifiers.dart';
 import 'songs.dart';
 import 'savingPrefs.dart';
 

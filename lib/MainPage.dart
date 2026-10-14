@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'sideFiles/consts/constants.dart';
-import 'sideFiles/consts/notifiers.dart';
+import 'consts/constants.dart';
+import 'consts/notifiers.dart';
 import 'sideFiles/savingPrefs.dart';
 import 'sideFiles/songs.dart';
 import 'SongsCataloguePage.dart';
