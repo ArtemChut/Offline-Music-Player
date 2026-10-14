@@ -9,6 +9,9 @@ import 'StatisticsPage.dart';
 import 'consts/styles.dart';
 import 'sideFiles/loadNotifiers.dart';
 
+int songsCount = 0;
+int? currentSongIndex;
+
 class SongsCataloguePage extends StatefulWidget {
   const SongsCataloguePage({super.key});
 
@@ -21,8 +24,6 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
 
   final double albumCoverSize = 240.0; // 300px is the width of every card so we give it a little margin
   final double cardWidth = 300;
-
-  int? currentSongIndex;
 
 
   Color? cardColour;
@@ -40,6 +41,8 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
       cardBackgroundColour = Colors.black26;
     }
   }
+
+
   
 
   @override
@@ -50,11 +53,12 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
 
   Future<void> initLoadData() async {
     await initLoadSongsList();
+    songsCount = loadedSongsNotifier.value.length;
+
     await initLoadCurrSong();
 
     currentSongIndex = currentSongNotifier.value;
 
-    //await checkDeletedSongs(); 1 second man, not done
   }
 
 
@@ -182,7 +186,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                           itemBuilder: (context, index) {
 
                         
-                          final song = listOfSongs[index];
+                          final song = listOfSongs[songsCount-1-index];
 
                         
                           return GestureDetector(

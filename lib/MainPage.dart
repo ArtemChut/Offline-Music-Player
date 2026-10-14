@@ -54,6 +54,11 @@ void main() async {
       }
     }
 
+    // if a path was deleted - change the currentSong index to be null again
+    if (loadedSongsNotifier.value.length != validSongs.length){
+      await saveCurrSong(null);
+    }
+
     loadedSongsNotifier.value = validSongs;
 
     await saveAllSongs();

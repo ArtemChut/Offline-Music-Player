@@ -26,10 +26,13 @@ Future<void> saveAllSongs() async {
 Future<void> saveCurrSong(currentSongIndex) async {
   final prefs = await SharedPreferences.getInstance();
 
-  if (currentSongIndex == null) return;
-
-  await prefs.setInt(
-    KConstant.currentSongKey,
-    currentSongIndex
-  );
+  if (currentSongIndex == null) {
+    await prefs.remove(KConstant.currentSongKey);
+  }
+  else{
+    await prefs.setInt(
+      KConstant.currentSongKey,
+      currentSongIndex
+    );
+  }
 }

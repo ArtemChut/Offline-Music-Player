@@ -1,10 +1,23 @@
 import 'dart:io';
+
 import '../consts/notifiers.dart';
 import 'songs.dart';
 import 'savingPrefs.dart';
 
+import '../SongsCataloguePage.dart';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+
+
+void adjustCurrSongIndex() async {
+  songsCount += 1;
+  if (currentSongIndex != null){
+    await saveCurrSong(currentSongIndex!+1);
+    currentSongIndex = currentSongIndex! + 1;
+    }
+}
+
 
 
 String songName(String name) {
@@ -58,4 +71,6 @@ Future<void> loadSongs() async {
   ];
 
   await saveAllSongs();
+
+  adjustCurrSongIndex();
 }
