@@ -26,6 +26,28 @@ Future<void> clearCurr() async {
   await prefs.remove(KConstant.currentSongKey);
 }
 
+
+
+void adjustCurrSongIndex(index) async {
+  // loading current curSongIndex
+  initLoadCurrSong();
+  currentSongIndex = currentSongNotifier.value;
+
+  if (currentSongIndex == null) return;
+
+  // if current song's index is > than deleted song's, then we decrement current song's index as a list is shorter now
+  if (currentSongIndex! > index){
+    currentSongIndex = currentSongIndex! - 1;
+    await saveCurrSong(currentSongIndex);
+  }
+  // set cur song's index to null as current song is the same song that was just deleted
+  else if (currentSongIndex == index){
+    currentSongIndex = null;
+    await saveCurrSong(currentSongIndex);
+  }
+}
+
+
 // SETTING THE THEME OF OUR BACKGROUND
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,12 +74,11 @@ void main() async {
       if (await File(song.path).exists()) {
         validSongs.add(song);
       }
+      else{
+        adjustCurrSongIndex(songs.indexOf(song));
+      }
     }
 
-    // if a path was deleted - change the currentSong index to be null again
-    if (loadedSongsNotifier.value.length != validSongs.length){
-      await saveCurrSong(null);
-    }
 
     loadedSongsNotifier.value = validSongs;
 

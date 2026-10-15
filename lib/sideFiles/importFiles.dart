@@ -10,7 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 
 
-void adjustCurrSongIndex() async {
+void incrementCurrSongIndex() async {
   songsCount += 1;
   if (currentSongIndex != null){
     await saveCurrSong(currentSongIndex!+1);
@@ -72,5 +72,5 @@ Future<void> loadSongs() async {
 
   await saveAllSongs();
 
-  adjustCurrSongIndex();
+  incrementCurrSongIndex();
 }
