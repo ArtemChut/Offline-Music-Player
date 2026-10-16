@@ -5,10 +5,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'consts/constants.dart';
 import 'consts/notifiers.dart';
 
+import 'consts/styles.dart';
+
 import 'sideFiles/savingPrefs.dart';
 
 import 'CataloguePage/SongsCataloguePage.dart';
-
 
 import 'CataloguePage/removingFaultyPaths.dart';
 
@@ -156,12 +157,7 @@ class MainPage extends StatelessWidget {
                       child:
                       Padding(
                         padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 8),
-                        child: Text(
-                          "Enter heaven",
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontFamily: "Trebuchet MS"
-                          )),
+                        child: Texts.simpleSizedText(text: "Enter heaven", fontSize: 28, font: "Trebuchet MS")
                       )),
                   )
                 ],),

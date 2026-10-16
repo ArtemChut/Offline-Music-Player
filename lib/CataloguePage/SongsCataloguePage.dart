@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../SettingsPage.dart';
@@ -11,6 +10,7 @@ import '../sideFiles/savingPrefs.dart';
 import '../sideFiles/bottomNavBar.dart';
 
 import 'songInteraction.dart';
+import 'songCards.dart';
 
 import '../consts/notifiers.dart';
 import '../consts/styles.dart';
@@ -107,8 +107,8 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
   @override
   Widget build(BuildContext context) {
 
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
 
 
 
@@ -129,7 +129,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
               children: [
                 // button allowing to change the theme colour
                 IconButton(
-                  style: AppButtonStyles.iconButton,
+                  style: IconButtonStyles.iconButton,
                   onPressed: () async {
                     isLightModeNotifier.value = !isLightModeNotifier.value;
                     saveThemeColour();
@@ -146,7 +146,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                     borderRadius: BorderRadius.circular(4)
                   ),
                   child: IconButton(
-                    style: AppButtonStyles.iconButton,
+                    style: IconButtonStyles.iconButton,
                     hoverColor: Colors.transparent,
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -158,7 +158,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                 ),
 
                 IconButton(
-                  style: AppButtonStyles.iconButton,
+                  style: IconButtonStyles.iconButton,
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) {
                       return const SettingsPage();
@@ -244,44 +244,18 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                       vertical: 12,
                                       horizontal: cardWidth*0.05
                                     ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                                      
-                                      // ALBUM COVER
-                                      if (song.cover == null)
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
-                                          child: SvgPicture.asset("assets/images/heart.svg", width: albumCoverSize)
-                                        )
-                                      else
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
-                                          child: Image.memory(song.cover!, width: albumCoverSize)
-                                        ),
-                                                      
-                                      // a little margin in between
-                                      SizedBox(height: screenHeight*0.6*0.08),
-                                      
-                                      // NAME + ARTIST NAME
-                                      Text(
-                                        song.name,
-                                                      
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: nameSize,
-                                        ),
-                                      ),
-                                                      
-                                      Text(
-                                        song.artist,
-                                                      
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: artistSize,
-                                        ),
-                                      ),
-                                    ],)
+                                    
+                                    // if a song is currently chosen - display extra stats
+                                    child:
+                                    index == currentSongIndex ? 
+                                    // a song thats currently delected, has skip/pause buttons and more
+                                    songCard(
+                                      index, currentSongIndex, selectedCardColour, cardColour, cardWidth, song, albumCoverSize, screenHeight, true
+                                    ) :
+                                    // a normal song card (not currently playing) + only shows song's name, artist, album cover
+                                    songCard(
+                                      index, currentSongIndex, selectedCardColour, cardColour, cardWidth, song, albumCoverSize, screenHeight, false
+                                    )
                                   ),
                                 ),
                               ),

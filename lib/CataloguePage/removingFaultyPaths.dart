@@ -55,5 +55,4 @@ Future<void> removeFaultySongs() async {
   await saveAllSongs();
 
   songsCount = validSongs.length;
-  print(currentSongIndex);
 }
