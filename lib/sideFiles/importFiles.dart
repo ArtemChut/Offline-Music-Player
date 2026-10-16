@@ -1,22 +1,14 @@
 import 'dart:io';
 
+import 'package:music_player/CataloguePage/SongsCataloguePage.dart';
+
 import '../consts/notifiers.dart';
 import 'songs.dart';
 import 'savingPrefs.dart';
 
-import '../SongsCataloguePage.dart';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 
-
-void incrementCurrSongIndex() async {
-  songsCount += 1;
-  if (currentSongIndex != null){
-    await saveCurrSong(currentSongIndex!+1);
-    currentSongIndex = currentSongIndex! + 1;
-    }
-}
 
 
 
@@ -39,6 +31,9 @@ Future<void> loadSongs() async {
   List<Song> newSongs = [];
 
   for (final song in result.files) {
+    songsCount += 1;
+    if (currentSongIndex != null) currentSongIndex  = currentSongIndex! + 1;
+
     if (song.path == null) return;
 
 
@@ -71,6 +66,5 @@ Future<void> loadSongs() async {
   ];
 
   await saveAllSongs();
-
-  incrementCurrSongIndex();
+  await saveCurrSong(currentSongIndex);
 }

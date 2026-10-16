@@ -26,7 +26,7 @@ Future<void> saveAllSongs() async {
 Future<void> saveCurrSong(currentSongIndex) async {
   final prefs = await SharedPreferences.getInstance();
 
-  if (currentSongIndex == null) {
+  if (currentSongIndex == null || currentSongIndex < 0) { // dont allow the index to be < 0
     await prefs.remove(KConstant.currentSongKey);
   }
   else{
@@ -35,4 +35,19 @@ Future<void> saveCurrSong(currentSongIndex) async {
       currentSongIndex
     );
   }
+}
+
+
+// saving time that a song's been played for in ms
+Future<void> saveTimePlayed() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  final int? timePlayed = timePlayedNotifier.value;
+
+  if (timePlayed == null) return;
+
+  await prefs.setInt(
+    KConstant.timePlayedKey,
+    timePlayed
+  );
 }

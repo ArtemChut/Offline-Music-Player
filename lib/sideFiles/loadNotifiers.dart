@@ -24,3 +24,10 @@ Future<void> initLoadCurrSong() async {
   final prefs = await SharedPreferences.getInstance();
   currentSongNotifier.value = prefs.getInt(KConstant.currentSongKey);
 }
+
+
+// loading time in ms that a song has been played for
+Future<void> initLoadTimePlayed() async {
+  final prefs = await SharedPreferences.getInstance();
+  timePlayedNotifier.value = prefs.getInt(KConstant.timePlayedKey);
+}

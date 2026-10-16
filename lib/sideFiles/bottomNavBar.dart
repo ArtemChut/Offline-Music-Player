@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'importFiles.dart';
 import '../SettingsPage.dart';
-import '../SongsCataloguePage.dart';
+import '../CataloguePage/SongsCataloguePage.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;

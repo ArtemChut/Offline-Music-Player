@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'consts/constants.dart';
-import 'consts/notifiers.dart';
-import 'sideFiles/savingPrefs.dart';
-import 'sideFiles/songs.dart';
-import 'SongsCataloguePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'sideFiles/loadNotifiers.dart';
+
+import 'consts/constants.dart';
+import 'consts/notifiers.dart';
+
+import 'sideFiles/savingPrefs.dart';
+
+import 'CataloguePage/SongsCataloguePage.dart';
+
+
+import 'CataloguePage/removingFaultyPaths.dart';
 
 
 
@@ -28,25 +31,6 @@ Future<void> clearCurr() async {
 
 
 
-void adjustCurrSongIndex(index) async {
-  // loading current curSongIndex
-  initLoadCurrSong();
-  currentSongIndex = currentSongNotifier.value;
-
-  if (currentSongIndex == null) return;
-
-  // if current song's index is > than deleted song's, then we decrement current song's index as a list is shorter now
-  if (currentSongIndex! > index){
-    currentSongIndex = currentSongIndex! - 1;
-    await saveCurrSong(currentSongIndex);
-  }
-  // set cur song's index to null as current song is the same song that was just deleted
-  else if (currentSongIndex == index){
-    currentSongIndex = null;
-    await saveCurrSong(currentSongIndex);
-  }
-}
-
 
 // SETTING THE THEME OF OUR BACKGROUND
 void main() async {
@@ -63,27 +47,7 @@ void main() async {
   isLightModeNotifier.value = prefs.getBool(KConstant.themeModeKey) ?? false;
 
   
-  // REMOVING A SONG IF PATH IS INVALID
-  if (!isFirstView.value) {
-    await initLoadSongsList();
-
-    final songs = loadedSongsNotifier.value;
-    final validSongs = <Song>[];
-
-    for (final song in songs) {
-      if (await File(song.path).exists()) {
-        validSongs.add(song);
-      }
-      else{
-        adjustCurrSongIndex(songs.indexOf(song));
-      }
-    }
-
-
-    loadedSongsNotifier.value = validSongs;
-
-    await saveAllSongs();
-  }
+  await removeFaultySongs();
   
 
   runApp(
