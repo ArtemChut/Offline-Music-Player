@@ -16,6 +16,7 @@ import '../consts/notifiers.dart';
 import '../consts/styles.dart';
 
 
+
 /* ------------------------------
        ALL THE VARIABLES
 -------------------------------*/
@@ -43,7 +44,8 @@ void loadColours(){
   }
 }
 
-
+// ALLOWS TO PLAY MUSIC FILES
+final AudioPlayer audioPlayer = AudioPlayer();
 
 
 class SongsCataloguePage extends StatefulWidget {
@@ -55,15 +57,12 @@ class SongsCataloguePage extends StatefulWidget {
 
 class _SongsCatalogueState extends State<SongsCataloguePage> {
   final ScrollController _scrollController = ScrollController();
-  late AudioPlayer _player;
 
 
   
   @override
   void initState() {
     super.initState();
-
-    _player = AudioPlayer(); // allows to play music files
 
     initLoadData();
   }
@@ -80,10 +79,10 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
       final timePlayed = timePlayedNotifier.value;
 
       try{
-        await _player.setFilePath(loadedSongsNotifier.value[currentSongIndex!].path); // loading the song using its path
+        await audioPlayer.setFilePath(loadedSongsNotifier.value[currentSongIndex!].path); // loading the song using its path
 
         if (timePlayed != null){
-          await _player.seek(Duration(milliseconds: timePlayed));
+          await audioPlayer.seek(Duration(milliseconds: timePlayed));
         }
       }
       on PlayerInterruptedException{
@@ -99,7 +98,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
   void dispose() {
     _scrollController.dispose();
 
-    _player.dispose();
+    audioPlayer.dispose();
 
     super.dispose();
   }
@@ -227,7 +226,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                           
                             return GestureDetector(
                               onTap: () async {
-                                await changeSong(index, _player, loadedSongsNotifier); // changing the song currently playing
+                                await changeSong(index, loadedSongsNotifier); // changing the song currently playing
                                 setState(() {
                                   // mb, ik it looks stupid but otherwise the update (new currently selected song) isnt being properly displayed
                                   currentSongIndex = currentSongIndex;
@@ -249,12 +248,28 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                     child:
                                     index == currentSongIndex ? 
                                     // a song thats currently delected, has skip/pause buttons and more
-                                    songCard(
-                                      index, currentSongIndex, selectedCardColour, cardColour, cardWidth, song, albumCoverSize, screenHeight, true
+                                    SongCard(
+                                      albumCoverSize: albumCoverSize,
+                                      cardColour: cardColour,
+                                      cardWidth: cardWidth,
+                                      currentSongIndex: currentSongIndex,
+                                      index: index,
+                                      screenHeight: screenHeight,
+                                      selectedCardColour: selectedCardColour,
+                                      song: song,
+                                      currentSong: true
                                     ) :
                                     // a normal song card (not currently playing) + only shows song's name, artist, album cover
-                                    songCard(
-                                      index, currentSongIndex, selectedCardColour, cardColour, cardWidth, song, albumCoverSize, screenHeight, false
+                                    SongCard(
+                                      albumCoverSize: albumCoverSize,
+                                      cardColour: cardColour,
+                                      cardWidth: cardWidth,
+                                      currentSongIndex: currentSongIndex,
+                                      index: index,
+                                      screenHeight: screenHeight,
+                                      selectedCardColour: selectedCardColour,
+                                      song: song,
+                                      currentSong: false
                                     )
                                   ),
                                 ),

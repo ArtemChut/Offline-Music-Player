@@ -1,19 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:music_player/consts/notifiers.dart';
 
+import 'removingFaultyPaths.dart';
 import 'SongsCataloguePage.dart';
 
 import '../sideFiles/savingPrefs.dart';
 
 
-Future<void> changeSong(int index, AudioPlayer _player, ValueNotifier loadedSongsNotifier) async {  
-  // PURELY FOR DEBUGGING PURPOSES
-  if (index == currentSongIndex){
-    await _player.stop();
-    return;
-  }
+Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier) async {  
 
   // stopping the previous song
   if (currentSongIndex != null){
@@ -26,21 +22,73 @@ Future<void> changeSong(int index, AudioPlayer _player, ValueNotifier loadedSong
 
 
   final song = loadedSongsNotifier.value[songsCount-1-index]; // opposite side of a list as we display songs right to left
+  song.isPlaying = true;
 
   try{
     if (await File(song.path).exists()){
-      await _player.setFilePath(song.path);
+      await audioPlayer.setFilePath(song.path);
 
-      await _player.play();
-      await _player.play(); // prevents a bug when launching a song for the very first time 
+      await audioPlayer.play();
+      await audioPlayer.play(); // prevents a bug when launching a song for the very first time 
     }
     
+    // deletes a song from out storage if the path is faulty
+    // GOTTA ADD A POP UP ERROR NOTIF THAT PATH WAS DESTROYED
     else{
-
+      await removeFaultySongs();
     }
   } 
-  on PlayerInterruptedException{
+  on Exception{
     // ignore if too many songs are being skipped in 1 second
+  }
+}
+
+
+void play_pause_song(song, bool playing) async {
+  if (await File(song.path).exists()){
+    if (playing){
+      await audioPlayer.play();
+    }
+    else{
+      await audioPlayer.pause();
+    }
+  }
+
+  // deletes a song from out storage if the path is faulty
+  // GOTTA ADD A POP UP ERROR NOTIF THAT PATH WAS DESTROYED
+  else{
+    await removeFaultySongs();
+  }
+}
+
+void prev_next_song(String type, void Function(VoidCallback) setState) async {
+  // if skipping to the next song
+  if (type == "next"){
+    changeSong((currentSongIndex! + 1) % songsCount, loadedSongsNotifier);
+
+    // update the visuals (pause/play buttons + current song card)
+    setState(() { });
+    await saveCurrSong(currentSongIndex);
+  }
+
+  // if going bck to the previous song
+  else{
+    if (currentSongIndex! > 0){ // dont allow to go out of bounds (-1...)
+      changeSong(currentSongIndex! - 1, loadedSongsNotifier);
+
+      // update the visuals (pause/play buttons + current song card)
+      setState(() { });
+
+      await saveCurrSong(currentSongIndex);
+    }
+
+    // if a user clicks on a "previous song" button when it's already the first song then just re-start it
+    else{
+      changeSong(currentSongIndex!, loadedSongsNotifier);
+
+      // update the visuals (pause/play button)
+      setState(() { });
+    }
   }
 }
 
