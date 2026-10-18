@@ -11,6 +11,23 @@ import '../sideFiles/savingPrefs.dart';
 
 Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier) async {  
 
+  int direction = 1;
+  if (currentSongIndex != null){
+    direction = index > currentSongIndex! ? 1 : -1;
+  }
+
+  
+  // scrolling our songs carousel 
+
+  scrollController.jumpTo(
+    (scrollController.offset + direction * cardWidth).clamp(
+      0.0,
+      scrollController.position.maxScrollExtent,
+    ),
+  );
+
+
+
   // stopping the previous song
   if (currentSongIndex != null){
     loadedSongsNotifier.value[currentSongIndex!].isPlaying = false;
@@ -44,7 +61,7 @@ Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier) async {
 }
 
 
-void play_pause_song(song, bool playing) async {
+void playPauseSong(song, bool playing) async {
   if (await File(song.path).exists()){
     if (playing){
       await audioPlayer.play();
@@ -64,27 +81,26 @@ void play_pause_song(song, bool playing) async {
 void prev_next_song(String type, void Function(VoidCallback) setState) async {
   // if skipping to the next song
   if (type == "next"){
-    changeSong((currentSongIndex! + 1) % songsCount, loadedSongsNotifier);
+    await changeSong((currentSongIndex! + 1) % songsCount, loadedSongsNotifier);
+    await saveCurrSong(currentSongIndex);
 
     // update the visuals (pause/play buttons + current song card)
     setState(() { });
-    await saveCurrSong(currentSongIndex);
   }
 
   // if going bck to the previous song
   else{
     if (currentSongIndex! > 0){ // dont allow to go out of bounds (-1...)
-      changeSong(currentSongIndex! - 1, loadedSongsNotifier);
-
+      await changeSong(currentSongIndex! - 1, loadedSongsNotifier);
+      await saveCurrSong(currentSongIndex);
+      
       // update the visuals (pause/play buttons + current song card)
       setState(() { });
-
-      await saveCurrSong(currentSongIndex);
     }
 
     // if a user clicks on a "previous song" button when it's already the first song then just re-start it
     else{
-      changeSong(currentSongIndex!, loadedSongsNotifier);
+      await changeSong(currentSongIndex!, loadedSongsNotifier);
 
       // update the visuals (pause/play button)
       setState(() { });

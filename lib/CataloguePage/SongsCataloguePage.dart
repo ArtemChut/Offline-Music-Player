@@ -47,6 +47,9 @@ void loadColours(){
 // ALLOWS TO PLAY MUSIC FILES
 final AudioPlayer audioPlayer = AudioPlayer();
 
+// ALLOWS TO SCROLL THROUGH THE SONGS CAROUSEL
+final ScrollController scrollController = ScrollController();
+
 
 class SongsCataloguePage extends StatefulWidget {
   const SongsCataloguePage({super.key});
@@ -56,9 +59,6 @@ class SongsCataloguePage extends StatefulWidget {
 }
 
 class _SongsCatalogueState extends State<SongsCataloguePage> {
-  final ScrollController _scrollController = ScrollController();
-
-
   
   @override
   void initState() {
@@ -96,7 +96,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    scrollController.dispose();
 
     audioPlayer.dispose();
 
@@ -202,11 +202,11 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
 
                     return Listener(
                         onPointerSignal: (event) {
-                          if (event is PointerScrollEvent && _scrollController.hasClients){
-                            _scrollController.jumpTo((_scrollController.offset + (event.scrollDelta.dy > 0 ? cardWidth : -cardWidth))
+                          if (event is PointerScrollEvent && scrollController.hasClients){
+                            scrollController.jumpTo((scrollController.offset + (event.scrollDelta.dy > 0 ? cardWidth : -cardWidth))
                               .clamp(
                                 0.0,
-                                _scrollController.position.maxScrollExtent,
+                                scrollController.position.maxScrollExtent,
                               ),
                             );
                           }
@@ -216,7 +216,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                         child: ListView.builder(
                           itemCount: listOfSongs.length,
                           scrollDirection: Axis.horizontal,
-                          controller: _scrollController,
+                          controller: scrollController,
                           itemBuilder: (context, index) {
 
                             final currSongIndexReversed = songsCount-1-index; // we add songs right to left, so we reverse the i
@@ -249,6 +249,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                     index == currentSongIndex ? 
                                     // a song thats currently delected, has skip/pause buttons and more
                                     SongCard(
+                                      setState,
                                       albumCoverSize: albumCoverSize,
                                       cardColour: cardColour,
                                       cardWidth: cardWidth,
@@ -261,6 +262,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                     ) :
                                     // a normal song card (not currently playing) + only shows song's name, artist, album cover
                                     SongCard(
+                                      setState,
                                       albumCoverSize: albumCoverSize,
                                       cardColour: cardColour,
                                       cardWidth: cardWidth,
