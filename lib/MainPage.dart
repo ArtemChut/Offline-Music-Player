@@ -30,6 +30,12 @@ Future<void> clearCurr() async {
   await prefs.remove(KConstant.currentSongKey);
 }
 
+Future<void> clearTime() async {
+  timePlayedNotifier.value = 0;
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(KConstant.timePlayedKey);
+}
+
 
 
 
@@ -43,6 +49,7 @@ void main() async {
 
   //clearSongs(); // for debugging purposes
   //clearCurr();
+  //clearTime();
 
   // loading a theme colour
   isLightModeNotifier.value = prefs.getBool(KConstant.themeModeKey) ?? false;

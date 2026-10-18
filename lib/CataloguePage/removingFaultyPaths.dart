@@ -15,7 +15,6 @@ void adjustCurrSongIndex(index) async {
 
   // if current song's index is < than deleted song's, then we decrement current song's index as a list is shorter now
   if (currentSongIndex == index){
-    print("wow");
     currentSongIndex = null;
     await saveCurrSong(currentSongIndex);
   }

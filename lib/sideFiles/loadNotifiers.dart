@@ -29,5 +29,12 @@ Future<void> initLoadCurrSong() async {
 // loading time in ms that a song has been played for
 Future<void> initLoadTimePlayed() async {
   final prefs = await SharedPreferences.getInstance();
-  timePlayedNotifier.value = prefs.getInt(KConstant.timePlayedKey);
+  timePlayedNotifier.value = prefs.getInt(KConstant.timePlayedKey) ?? 0;
+}
+
+
+// loading the x position of our carousel
+Future<void> initLoadScrollBarPos() async {
+  final prefs = await SharedPreferences.getInstance();
+  scrollBarPosNotifier.value = prefs.getDouble(KConstant.scrollBarPosKey) ?? 0;
 }

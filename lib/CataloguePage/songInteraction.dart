@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:music_player/consts/notifiers.dart';
+import 'package:music_player/sideFiles/loadNotifiers.dart';
 
 import 'removingFaultyPaths.dart';
 import 'SongsCataloguePage.dart';
@@ -16,15 +17,21 @@ Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier) async {
     direction = index > currentSongIndex! ? 1 : -1;
   }
 
+
+  double x = scrollController.offset + direction * cardWidth/2; // x coordinate that a carousel should move to
+  // go back to the very start of the carousel if a user went from the very last son to the very first song by pressing on a "next song" button
+  if (index == 0 && currentSongIndex == songsCount-1) x = 0;
+
   
   // scrolling our songs carousel 
-
-  scrollController.jumpTo(
-    (scrollController.offset + direction * cardWidth).clamp(
-      0.0,
-      scrollController.position.maxScrollExtent,
-    ),
-  );
+  if (index != currentSongIndex){ // don't scroll the carousel if the song currently playing is the same as a song that was playing before that
+    scrollController.jumpTo(
+      (x).clamp(
+        0.0,
+        scrollController.position.maxScrollExtent,
+      ),
+    );
+  }
 
 
 
@@ -78,7 +85,7 @@ void playPauseSong(song, bool playing) async {
   }
 }
 
-void prev_next_song(String type, void Function(VoidCallback) setState) async {
+void prevNextSong(String type, void Function(VoidCallback) setState) async {
   // if skipping to the next song
   if (type == "next"){
     await changeSong((currentSongIndex! + 1) % songsCount, loadedSongsNotifier);
@@ -88,7 +95,7 @@ void prev_next_song(String type, void Function(VoidCallback) setState) async {
     setState(() { });
   }
 
-  // if going bck to the previous song
+  // if going back to the previous song
   else{
     if (currentSongIndex! > 0){ // dont allow to go out of bounds (-1...)
       await changeSong(currentSongIndex! - 1, loadedSongsNotifier);
@@ -109,10 +116,27 @@ void prev_next_song(String type, void Function(VoidCallback) setState) async {
 }
 
 
-Duration? position;
+
 // formats time that a song's been played for so it looks e.g. like 01.00
 String formatDuration(String time){
   final String seconds = time.substring(5,7);
   final String minutes = time.substring(2,4);
   return "${minutes}.${seconds}";
+}
+
+
+
+Future<void> restoreScrollPosition() async {
+  await initLoadScrollBarPos();
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(
+        scrollBarPosNotifier.value.clamp(
+          0.0,
+          scrollController.position.maxScrollExtent,
+        ),
+      );
+    }
+  });
 }

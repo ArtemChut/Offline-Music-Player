@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:just_audio/just_audio.dart';
+
+import 'package:music_player/CataloguePage/SongsCataloguePage.dart';
+import 'package:music_player/CataloguePage/songEndedHandling.dart';
+import 'package:music_player/consts/notifiers.dart';
+
 import 'package:music_player/sideFiles/savingPrefs.dart';
 
 import '../consts/styles.dart';
@@ -9,7 +15,6 @@ import 'songInteraction.dart';
 /* - - - - - - - - 
 2 variations of cards, a normal one with song name, artist name, album cover and a song currently playing which has skip/pause buttons and other info such as length of a song and such 
                                                         - - - - - - - - - - - */
-
 Padding SongCard( void Function(VoidCallback) setState,
   {albumCoverSize, cardColour, cardWidth, currentSongIndex, index, screenHeight, selectedCardColour, song, currentSong}
 
@@ -61,49 +66,94 @@ Padding SongCard( void Function(VoidCallback) setState,
         )
         ),
 
+
+        // IF A SONG IS A SONG CURRENTLY PLAYING ...
         if (currentSong)
-          // extra stats
+          // THEN DISPLAY EXTRA STATS SUCH AS PAUSE/PLAY/NEXT/PREV BUTTONS
           Expanded(
             flex: 20,
             child: SizedBox(
             width: double.maxFinite,
-        
+
+            // everything about the song (time + interactive buttons such as pause/play)
             child: Card(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-              
                 children: [
-                  IconButtonStyles.trasnferIconButton(
-                    action: () {prev_next_song("prev", setState);}, 
-                    icon: Icon(Icons.skip_previous_rounded)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                  
+                    children: [
+                      // GO BACK TO A PREVIOUS SONG
+                      IconButtonStyles.trasnferIconButton(
+                        action: () {prevNextSong("prev", setState);}, 
+                        icon: Icon(Icons.skip_previous_rounded)
+                      ),
+
+                      // PAUSE/PLAY A SONG
+                      IconButtonStyles.trasnferIconButton(
+                        action: () async {
+                          setState((){
+                            // change the icon to paused/playing
+                            song.isPlaying = !song.isPlaying;
+                          });
+                  
+                          // play/pause a song depending on the input
+                          playPauseSong(song, song.isPlaying);
+                  
+                          await saveAllSongs();
+                        }, 
+                        icon: Icon(song.isPlaying ? Icons.pause : Icons.play_arrow_rounded),
+                      ),
+                  
+                      // SKIP TO THE NEXT SONG IN THE QUEUE
+                      IconButtonStyles.trasnferIconButton(
+                        action: () {prevNextSong("next", setState);}, 
+                        icon: Icon(Icons.skip_next_rounded)
+                      ),
+                    ],
                   ),
 
-                  IconButtonStyles.trasnferIconButton(
-                    action: () async {
-                      setState((){
-                        // change the icon to paused/playing
-                        song.isPlaying = !song.isPlaying;
-                      });
 
-                      // play/pause a song depending on the input
-                      playPauseSong(song, song.isPlaying);
+                  // DISPLAYS HOW MUCH OF A SONG'S BEEN PLAYED ALREADY & TOTAL TIME
+                  StreamBuilder<Duration?>(
+                    stream: audioPlayer.durationStream,
+                    builder: (context, durationSnapshot) {
+                      final duration = durationSnapshot.data;
 
-                      await saveAllSongs();
-                    }, 
-                    icon: Icon(song.isPlaying ? Icons.pause : Icons.play_arrow_rounded),
-                  ),
-              
-                  IconButtonStyles.trasnferIconButton(
-                    action: () {prev_next_song("next", setState);}, 
-                    icon: Icon(Icons.skip_next_rounded)
+                      return StreamBuilder<Duration>(
+                        stream: audioPlayer.positionStream,
+                        builder: (context, positionSnapshot) {
+                          final position = positionSnapshot.data;
+
+                          if (position != null && audioPlayer.processingState == ProcessingState.ready) {
+                            timePlayedNotifier.value = position.inMilliseconds;
+                            saveTimePlayed();
+                          }
+
+
+                          // DISPLAY HOW MUCH OF A SONG HAS BEEN PLAYED ALREADY + THE TOTAL LENGTH
+                          try{
+                            return Text(
+                              "${formatDuration(position.toString())} : ${formatDuration(duration.toString())}",
+                            );
+                          }
+                          on RangeError{
+                            return const Text("-- : --");
+                          }
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
             ),
           )
-          )
+        ),
+        // GO TO THE NEXT SONG IF THE ONE PLAYING HAS ENDED
+        checkSongEnded(setState)
     ],),
   );
 }

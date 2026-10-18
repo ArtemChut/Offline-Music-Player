@@ -2,24 +2,25 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
-import '../SettingsPage.dart';
-import '../StatisticsPage.dart';
-
 import '../sideFiles/loadNotifiers.dart';
 import '../sideFiles/savingPrefs.dart';
-import '../sideFiles/bottomNavBar.dart';
-
-import 'songInteraction.dart';
-import 'songCards.dart';
 
 import '../consts/notifiers.dart';
 import '../consts/styles.dart';
+
+import '../sideFiles/bottomNavBar.dart';
+import 'songCards.dart';
+
+import 'songInteraction.dart';
+
 
 
 
 /* ------------------------------
        ALL THE VARIABLES
 -------------------------------*/
+
+
 int songsCount = 0;
 
 int? currentSongIndex;
@@ -48,7 +49,7 @@ void loadColours(){
 final AudioPlayer audioPlayer = AudioPlayer();
 
 // ALLOWS TO SCROLL THROUGH THE SONGS CAROUSEL
-final ScrollController scrollController = ScrollController();
+ScrollController scrollController = ScrollController();
 
 
 class SongsCataloguePage extends StatefulWidget {
@@ -64,7 +65,12 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
   void initState() {
     super.initState();
 
-    initLoadData();
+    scrollController.addListener(() {
+      scrollBarPosNotifier.value = scrollController.offset;
+      saveScrollBarPos(scrollController.offset);
+    });
+
+    initLoadData(); // initialise all data (notifiers)
   }
 
   Future<void> initLoadData() async {
@@ -74,22 +80,23 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
     await initLoadCurrSong();
     currentSongIndex = currentSongNotifier.value;
 
-    await initLoadTimePlayed();
+    await restoreScrollPosition();
+
+
     if (currentSongIndex != null){
-      final timePlayed = timePlayedNotifier.value;
+
 
       try{
-        await audioPlayer.setFilePath(loadedSongsNotifier.value[currentSongIndex!].path); // loading the song using its path
+        await audioPlayer.setFilePath(loadedSongsNotifier.value[songsCount - 1 - currentSongIndex!].path); // loading the song using its path
 
-        if (timePlayed != null){
-          await audioPlayer.seek(Duration(milliseconds: timePlayed));
-        }
+        await initLoadTimePlayed(); // loading a time where a song was left of
+        final timePlayed = timePlayedNotifier.value;
+        await audioPlayer.seek(Duration(milliseconds: timePlayed));
       }
       on PlayerInterruptedException{
         // if user interacts with a song before everything had enough time to be initialised - don't do anything
       }
     }
-    
   }
 
 
@@ -117,59 +124,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
         loadColours(); // changes colour of cards if the theme colour changes
         // APPBAR
         return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-        
-            backgroundColor: !isLightMode ? const Color.fromARGB(255, 37, 31, 48) : const Color.fromARGB(255, 118, 226, 174),
-
-            // EVRYTHING INSIDE THE APPBAR
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // button allowing to change the theme colour
-                IconButton(
-                  style: IconButtonStyles.iconButton,
-                  onPressed: () async {
-                    isLightModeNotifier.value = !isLightModeNotifier.value;
-                    saveThemeColour();
-                  },
-                icon: Icon(isLightMode ? Icons.light_mode : Icons.dark_mode),
-                ),
-
-                // pulling up the stats button
-                Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: !isLightMode ? const Color.fromARGB(255, 44, 37, 56) : const Color.fromARGB(255, 151, 224, 189),
-                    borderRadius: BorderRadius.circular(4)
-                  ),
-                  child: IconButton(
-                    style: IconButtonStyles.iconButton,
-                    hoverColor: Colors.transparent,
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) {
-                        return const StatisticsPage();
-                      },));
-                    },
-                    icon: Icon(Icons.add_chart_rounded)
-                  )
-                ),
-
-                IconButton(
-                  style: IconButtonStyles.iconButton,
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) {
-                      return const SettingsPage();
-                    },));
-                  },
-                  icon: Icon(Icons.settings)
-                )
-              ],  
-            ),
-          ),
-
-
+          appBar: customAppBar(),
 
 
           // MAIN BODY
@@ -203,7 +158,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                     return Listener(
                         onPointerSignal: (event) {
                           if (event is PointerScrollEvent && scrollController.hasClients){
-                            scrollController.jumpTo((scrollController.offset + (event.scrollDelta.dy > 0 ? cardWidth : -cardWidth))
+                            scrollController.jumpTo((scrollController.offset + (event.scrollDelta.dy > 0 ? cardWidth/2 : -cardWidth/2))
                               .clamp(
                                 0.0,
                                 scrollController.position.maxScrollExtent,
