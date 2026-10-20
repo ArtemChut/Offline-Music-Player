@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:music_player/CataloguePage/SongsCataloguePage.dart';
+import 'package:music_player/PlaylistsPage.dart';
 
 import 'package:music_player/consts/notifiers.dart';
+import 'package:music_player/sideFiles/importFiles.dart';
 import 'package:music_player/sideFiles/savingPrefs.dart';
 
-import '../StatisticsPage.dart';
 import '../SettingsPage.dart';
 
 
@@ -84,14 +86,11 @@ class customAppBar extends StatelessWidget implements PreferredSizeWidget {
                   style: IconButtonStyles.iconButton,
                   hoverColor: Colors.transparent,
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const StatisticsPage(),
-                      ),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return const PlaylistsPage();
+                    },));
                   },
-                  icon: const Icon(Icons.add_chart_rounded),
+                  icon: const Icon(Icons.playlist_play_rounded),
                 ),
               ),
 
@@ -114,3 +113,84 @@ class customAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 }
+
+
+// BOTTOM NAVIGATION BAR
+class BottomNavBar extends StatelessWidget {
+  final int currentIndex;
+
+  const BottomNavBar({
+    super.key,
+    required this.currentIndex,
+  });
+  
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      backgroundColor: isLightModeNotifier.value
+        ? const Color.fromARGB(213, 213, 239, 225)
+        : const Color.fromARGB(80, 31, 22, 37),
+
+      selectedItemColor: isLightModeNotifier.value
+        ? Colors.black
+        : Colors.white,
+
+      unselectedItemColor: isLightModeNotifier.value
+        ? Colors.black54
+        : Colors.white60,
+      
+      type: BottomNavigationBarType.fixed,
+
+      showUnselectedLabels: true,
+        
+      currentIndex: currentIndex,
+      onTap: (index) async {
+        switch (index){
+          case 0:
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return const SongsCataloguePage();
+            },));
+          case 1:
+            await loadSongs();
+          case 2:
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return const PlaylistsPage();
+            },));
+          case 3:
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return const PlaylistsPage();
+            },));
+          case 4:
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return SettingsPage();
+            },));
+        }
+      },
+
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.music_note_outlined),
+          label: 'Catalogue',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.system_update_tv_rounded),
+          label: 'Import',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.playlist_play_rounded),
+          label: 'Playlists',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.add_chart_rounded),
+          label: 'Statistics',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings),
+          label: 'Settings',
+        ),
+      ],
+    );
+  }
+}
+

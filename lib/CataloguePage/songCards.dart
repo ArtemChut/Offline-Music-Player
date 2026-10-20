@@ -77,6 +77,7 @@ Padding SongCard( void Function(VoidCallback) setState,
 
             // everything about the song (time + interactive buttons such as pause/play)
             child: Card(
+              color: isLightModeNotifier.value ? null : const Color.fromARGB(93, 40, 26, 44),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

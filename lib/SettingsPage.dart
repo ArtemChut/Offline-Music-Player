@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'sideFiles/bottomNavBar.dart';
+
+import 'package:music_player/consts/styles.dart';
+
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});

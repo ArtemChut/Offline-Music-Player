@@ -8,7 +8,6 @@ import '../sideFiles/savingPrefs.dart';
 import '../consts/notifiers.dart';
 import '../consts/styles.dart';
 
-import '../sideFiles/bottomNavBar.dart';
 import 'songCards.dart';
 
 import 'songInteraction.dart';
