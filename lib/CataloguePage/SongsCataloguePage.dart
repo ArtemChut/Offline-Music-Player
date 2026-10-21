@@ -4,13 +4,14 @@ import 'package:just_audio/just_audio.dart';
 
 import '../sideFiles/loadNotifiers.dart';
 import '../sideFiles/savingPrefs.dart';
+import 'songInteraction.dart';
 
 import '../consts/notifiers.dart';
 import '../consts/styles.dart';
 
 import 'songCards.dart';
 
-import 'songInteraction.dart';
+import '../SettingsPage.dart';
 
 
 
@@ -123,7 +124,35 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
         loadColours(); // changes colour of cards if the theme colour changes
         // APPBAR
         return Scaffold(
-          appBar: customAppBar(),
+          appBar: customAppBar(
+            elements: [
+              IconButton(
+                style: IconButtonStyles.iconButton,
+                onPressed: () async {
+                  isLightModeNotifier.value = !isLightModeNotifier.value;
+                  saveThemeColour();
+                },
+                icon: Icon(
+                  isLightMode ? Icons.light_mode : Icons.dark_mode,
+                ),
+              ),
+
+              IconButton(
+                style: IconButtonStyles.iconButton,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return const SettingsPage();
+                      }
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.settings),
+              ),
+            ]
+          ),
 
 
           // MAIN BODY
@@ -179,6 +208,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
 
                           
                             return GestureDetector(
+                              // single left mouse click
                               onTap: () async {
                                 await changeSong(index, loadedSongsNotifier); // changing the song currently playing
                                 setState(() {
@@ -186,6 +216,44 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                   currentSongIndex = currentSongIndex;
                                 });
                               },
+
+                              // right mouse click
+                              onSecondaryTapUp: (details) async {
+                                // get the position of the mouse
+                                final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+                                final mousePosition = overlay.globalToLocal(details.globalPosition);
+
+                                // show the popup menu at the mouse position
+                                final action = await showMenu<String>(
+                                  context: context,
+                                  position: RelativeRect.fromLTRB(
+                                    mousePosition.dx,
+                                    mousePosition.dy,
+                                    overlay.size.width - mousePosition.dx,
+                                    overlay.size.height - mousePosition.dy,
+                                  ),
+                                  items: [
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text('Delete song'),
+                                          Icon(Icons.delete, color: Colors.red)
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+
+                                // handle the selected action
+                                if (action == 'delete') {
+                                  deleteSong(song, songsCount-currSongIndexReversed-1);
+                                }
+                              },
+
+
           
                               child: SizedBox(
                                 width: cardWidth,
@@ -212,7 +280,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                       screenHeight: screenHeight,
                                       selectedCardColour: selectedCardColour,
                                       song: song,
-                                      currentSong: true
+                                      currentSong: true,
                                     ) :
                                     // a normal song card (not currently playing) + only shows song's name, artist, album cover
                                     SongCard(

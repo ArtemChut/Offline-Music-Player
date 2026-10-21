@@ -59,7 +59,7 @@ Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier) async {
     // deletes a song from out storage if the path is faulty
     // GOTTA ADD A POP UP ERROR NOTIF THAT PATH WAS DESTROYED
     else{
-      await removeFaultySongs();
+      await deleteSong(song, index);
     }
   } 
   on Exception{
@@ -68,7 +68,7 @@ Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier) async {
 }
 
 
-void playPauseSong(song, bool playing) async {
+void playPauseSong(song, bool playing, int index) async {
   if (await File(song.path).exists()){
     if (playing){
       await audioPlayer.play();
@@ -81,7 +81,7 @@ void playPauseSong(song, bool playing) async {
   // deletes a song from out storage if the path is faulty
   // GOTTA ADD A POP UP ERROR NOTIF THAT PATH WAS DESTROYED
   else{
-    await removeFaultySongs();
+    await deleteSong(song, index);
   }
 }
 
@@ -122,6 +122,19 @@ String formatDuration(String time){
   final String seconds = time.substring(5,7);
   final String minutes = time.substring(2,4);
   return "${minutes}.${seconds}";
+}
+
+
+// when a user purposefuly deletes a song
+Future<void> deleteSong(song, index) async {
+  final songs = List.of(loadedSongsNotifier.value);
+  songs.remove(song);
+  loadedSongsNotifier.value = songs;
+  await saveAllSongs();
+  
+  songsCount -= 1; // so it doesnt go out of range when re-building
+
+  adjustCurrSongIndex(index);
 }
 
 

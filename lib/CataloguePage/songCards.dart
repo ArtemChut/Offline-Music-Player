@@ -102,7 +102,7 @@ Padding SongCard( void Function(VoidCallback) setState,
                           });
                   
                           // play/pause a song depending on the input
-                          playPauseSong(song, song.isPlaying);
+                          playPauseSong(song, song.isPlaying, index);
                   
                           await saveAllSongs();
                         }, 

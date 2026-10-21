@@ -4,9 +4,6 @@ import 'package:music_player/PlaylistsPage.dart';
 
 import 'package:music_player/consts/notifiers.dart';
 import 'package:music_player/sideFiles/importFiles.dart';
-import 'package:music_player/sideFiles/savingPrefs.dart';
-
-import '../SettingsPage.dart';
 
 
 const double nameSize = 26;
@@ -43,7 +40,8 @@ class Texts {
 
 // CLASSIC APPBAR
 class customAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const customAppBar({super.key});
+  final List<Widget> elements; // all elements inside the appbar
+  const customAppBar({super.key, required this.elements});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -61,52 +59,7 @@ class customAppBar extends StatelessWidget implements PreferredSizeWidget {
               : const Color.fromARGB(255, 118, 226, 174),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                style: IconButtonStyles.iconButton,
-                onPressed: () async {
-                  isLightModeNotifier.value = !isLightModeNotifier.value;
-                  saveThemeColour();
-                },
-                icon: Icon(
-                  isLightMode ? Icons.light_mode : Icons.dark_mode,
-                ),
-              ),
-
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: !isLightMode
-                      ? const Color.fromARGB(255, 44, 37, 56)
-                      : const Color.fromARGB(255, 151, 224, 189),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: IconButton(
-                  style: IconButtonStyles.iconButton,
-                  hoverColor: Colors.transparent,
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) {
-                      return const PlaylistsPage();
-                    },));
-                  },
-                  icon: const Icon(Icons.playlist_play_rounded),
-                ),
-              ),
-
-              IconButton(
-                style: IconButtonStyles.iconButton,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const SettingsPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.settings),
-              ),
-            ],
+            children: elements
           ),
         );
       },
@@ -161,10 +114,6 @@ class BottomNavBar extends StatelessWidget {
             Navigator.push(context, MaterialPageRoute(builder: (context) {
               return const PlaylistsPage();
             },));
-          case 4:
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return SettingsPage();
-            },));
         }
       },
 
@@ -184,10 +133,6 @@ class BottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.add_chart_rounded),
           label: 'Statistics',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
-          label: 'Settings',
         ),
       ],
     );

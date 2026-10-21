@@ -17,6 +17,11 @@ void adjustCurrSongIndex(index) async {
   if (currentSongIndex == index){
     currentSongIndex = null;
     await saveCurrSong(currentSongIndex);
+
+    // resetting the time back to 0 as if time > new song's length, an out of range error will occur
+    timePlayedNotifier.value = 0;
+    await saveTimePlayed();
+
   }
   // length of a list is reducing so we decrement our current song index
   else if (currentSongIndex! > index) {
@@ -27,8 +32,8 @@ void adjustCurrSongIndex(index) async {
 }
 
 
-
-Future<void> removeFaultySongs() async {
+// IS ONLY BEING USED WHEN AN APP IS FIRST LOADED AS THIS FUNCTION REMOVES ALL THE SONGS WHERE A PATH WAS CORRUPTED, NOT ONLY 1 SPECIFIC SONG
+Future<void> removeFaultyPaths() async {
   // REMOVING A SONG IF PATH IS INVALID
   await initLoadSongsList();
   final songs = loadedSongsNotifier.value;

@@ -55,7 +55,7 @@ void main() async {
   isLightModeNotifier.value = prefs.getBool(KConstant.themeModeKey) ?? false;
 
   
-  await removeFaultySongs();
+  await removeFaultyPaths();
   
 
   runApp(
