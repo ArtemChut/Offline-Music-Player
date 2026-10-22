@@ -11,7 +11,7 @@ import 'sideFiles/savingPrefs.dart';
 
 import 'CataloguePage/SongsCataloguePage.dart';
 
-import 'CataloguePage/removingFaultyPaths.dart';
+import 'CataloguePage/sideFiled/removingFaultyPaths.dart';
 
 
 
@@ -126,7 +126,7 @@ class MainPage extends StatelessWidget {
               padding: EdgeInsets.all(40),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(17, 64, 35, 83),
+                  color: const Color.fromARGB(17, 91, 75, 103),
                   borderRadius: BorderRadius.circular(40)
                 ),
                 width: screenWidth*0.6,

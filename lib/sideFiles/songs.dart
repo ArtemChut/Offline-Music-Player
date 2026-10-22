@@ -1,11 +1,10 @@
 import 'dart:typed_data';
 import 'dart:convert';
 
-// SAVING ALL THE SONGS IN A JSON FORMAT SO THAT IN CAN BE SAVED BY A VALUE NOTIFIER THINGY
 class Song {
-  final String name;
-  final String artist;
-  final Uint8List? cover;
+  String name;
+  String artist;
+  Uint8List? cover;
   final String path;
   bool isPlaying;
 
@@ -17,26 +16,27 @@ class Song {
     this.isPlaying = false,
   });
 
-
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'artist': artist,
       'path': path,
       'isPlaying': isPlaying,
-      'cover': cover == null ? null : base64Encode(cover!)
+      'cover': cover == null
+          ? null
+          : base64Encode(cover!),
     };
   }
 
   factory Song.fromJson(Map<String, dynamic> json) {
     return Song(
-      name: json['name'],
-      artist: json['artist'],
-      path: json['path'],
-      isPlaying: json['isPlaying'],
+      name: json['name'] as String,
+      artist: json['artist'] as String,
+      path: json['path'] as String,
+      isPlaying: json['isPlaying'] as bool? ?? false,
       cover: json['cover'] == null
-        ? null
-        : base64Decode(json['cover'] as String)
+          ? null
+          : base64Decode(json['cover'] as String),
     );
   }
 }

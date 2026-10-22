@@ -1,15 +1,16 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:music_player/sideFiles/changingSongProps.dart';
 
 import '../sideFiles/loadNotifiers.dart';
 import '../sideFiles/savingPrefs.dart';
-import 'songInteraction.dart';
+import 'sideFiled/songInteraction.dart';
 
 import '../consts/notifiers.dart';
 import '../consts/styles.dart';
 
-import 'songCards.dart';
+import 'sideFiled/songCards.dart';
 
 import '../SettingsPage.dart';
 
@@ -234,6 +235,43 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                     overlay.size.height - mousePosition.dy,
                                   ),
                                   items: [
+                                    // change song's name button
+                                    const PopupMenuItem(
+                                      value: 'name',
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text("Change song's name"),
+                                          Icon(Icons.pest_control_rodent_rounded)
+                                        ],
+                                      ),
+                                    ),
+
+                                    // change name of the artist button
+                                    const PopupMenuItem(
+                                      value: 'artist',
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text("Change song's artist name"),
+                                          Icon(Icons.person_3_outlined)
+                                        ],
+                                      ),
+                                    ),
+
+                                    // change the album cover button
+                                    const PopupMenuItem(
+                                      value: 'albumCover',
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text('Change the album cover'),
+                                          Icon(Icons.album)
+                                        ],
+                                      ),
+                                    ),
+
+                                    // delete a song button
                                     const PopupMenuItem(
                                       value: 'delete',
                                       child: Row(
@@ -247,9 +285,16 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                   ],
                                 );
 
-                                // handle the selected action
-                                if (action == 'delete') {
-                                  deleteSong(song, songsCount-currSongIndexReversed-1);
+                                // handles the selected action
+                                switch (action) {
+                                  case "delete":
+                                    deleteSong(song, songsCount-currSongIndexReversed-1);
+                                  case "name":
+                                    changeSongProps("name", song, context, setState);
+                                  case "artist":
+                                    changeSongProps("artist", song, context, setState);
+                                  case "albumCover":
+                                    changeAlbumCover();
                                 }
                               },
 

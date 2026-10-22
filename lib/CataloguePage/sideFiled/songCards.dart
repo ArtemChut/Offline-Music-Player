@@ -3,12 +3,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:music_player/CataloguePage/SongsCataloguePage.dart';
-import 'package:music_player/CataloguePage/songEndedHandling.dart';
+import 'package:music_player/CataloguePage/sideFiled/songEndedHandling.dart';
 import 'package:music_player/consts/notifiers.dart';
 
 import 'package:music_player/sideFiles/savingPrefs.dart';
 
-import '../consts/styles.dart';
+import '../../consts/styles.dart';
 import 'songInteraction.dart';
 
 

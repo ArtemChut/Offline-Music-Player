@@ -5,9 +5,9 @@ import 'package:music_player/consts/notifiers.dart';
 import 'package:music_player/sideFiles/loadNotifiers.dart';
 
 import 'removingFaultyPaths.dart';
-import 'SongsCataloguePage.dart';
+import '../SongsCataloguePage.dart';
 
-import '../sideFiles/savingPrefs.dart';
+import '../../sideFiles/savingPrefs.dart';
 
 
 Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier) async {  

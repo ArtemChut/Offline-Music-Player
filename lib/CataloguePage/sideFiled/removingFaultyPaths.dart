@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import '../consts/notifiers.dart';
+import '../../consts/notifiers.dart';
 
-import '../sideFiles/loadNotifiers.dart';
-import '../sideFiles/savingPrefs.dart';
+import '../../sideFiles/loadNotifiers.dart';
+import '../../sideFiles/savingPrefs.dart';
 
-import 'SongsCataloguePage.dart';
+import '../SongsCataloguePage.dart';
 
-import '../sideFiles/songs.dart';
+import '../../sideFiles/songs.dart';
 
 
 void adjustCurrSongIndex(index) async {
