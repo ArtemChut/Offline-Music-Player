@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+
 import 'package:music_player/CataloguePage/SongsCataloguePage.dart';
 import 'package:music_player/PlaylistsPage.dart';
 
 import 'package:music_player/consts/notifiers.dart';
-import 'package:music_player/sideFiles/importFiles.dart';
+import 'package:music_player/sideFiles/importSongs.dart';
 
 
 const double nameSize = 26;
@@ -36,6 +40,50 @@ class Texts {
     );
   }
 }
+
+
+// CHECKING WHETHER A SONG HAS AN ALBUM COVER, IF YES LOAD IT, OTHERWISE - LOAD A BASIC PHOTO
+ClipRRect displayAlbumCover(song, currentSong, screenHeight) {
+  // if a song has no album cover
+  if (song.cover == null && song.alteredAlbumCoverPath == null){
+    print("god fucking damn it");
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: SvgPicture.asset("assets/images/heart.svg",
+      width: currentSong ? screenHeight*0.8*0.4 : albumCoverSize) // scale down a bit if it's a currently selected song
+    );
+  }
+  else{
+    if (song.alteredAlbumCoverPath == null){
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.memory(song.cover!,
+        width: currentSong ? albumCoverSize*0.8 : albumCoverSize) // scale down a bit if it's a currently selected song
+      );
+    }
+    else{
+      if (song.alteredAlbumCoverPath.endsWith(".svg")){
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: SvgPicture.file(File(song.alteredAlbumCoverPath!),
+            width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
+          ) // scale down a bit if it's a currently selected song
+        );
+      }
+      else{
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(File(song.alteredAlbumCoverPath!),
+            width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
+            height: currentSong ? albumCoverSize*0.8 : albumCoverSize,
+            fit: BoxFit.cover,
+          ) // scale down a bit if it's a currently selected song
+        );
+      }
+    }
+  }
+}
+
 
 
 // CLASSIC APPBAR

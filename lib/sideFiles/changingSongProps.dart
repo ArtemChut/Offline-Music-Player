@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:music_player/sideFiles/savingPrefs.dart';
+
 
 Future<void> changeSongProps(String type, song, BuildContext context, void Function(VoidCallback) setState) async {
   final controller = TextEditingController();
@@ -52,6 +55,29 @@ Future<void> changeSongProps(String type, song, BuildContext context, void Funct
 }
 
 
-void changeAlbumCover(){
+const allowed = [".svg", ".png", ".jpg"];
+Future<void> changeAlbumCover(song, void Function(VoidCallback) setState) async {
+  // allowing user to pick any image file
+  final result = await FilePicker.platform.pickFiles(type: FileType.image);
 
+  if (result == null) return;
+
+  // finding out what format an image is in
+  String filePath = result.paths[0]!;
+  String fileExtension = "";
+  while (!filePath.endsWith(".")){
+    fileExtension += filePath[filePath.length-1];
+    filePath = filePath.substring(0, filePath.length - 1);
+  }
+  fileExtension += ".";
+  fileExtension = fileExtension.split('').reversed.join('');
+
+
+  if (!allowed.contains(fileExtension)) return;
+
+
+  song.alteredAlbumCoverPath = result.paths[0];
+  await saveAllSongs();
+
+  setState((){});
 }

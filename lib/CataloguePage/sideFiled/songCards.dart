@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:music_player/CataloguePage/SongsCataloguePage.dart';
@@ -34,19 +33,7 @@ Padding SongCard( void Function(VoidCallback) setState,
             SizedBox(height: screenHeight*0.6*0.08*0.6),
 
 
-            // CHECKING WHETHER A SONG HAS AN ALBUM COVER, IF YES LOAD IT, OTHERWISE - LOAD A BASIC PHOTO
-            song.cover==null ? // if a song has no album cover
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: SvgPicture.asset("assets/images/heart.svg",
-              width: currentSong ? screenHeight*0.8*0.4 : albumCoverSize) // scale down a bit if it's a currently selected song
-            )
-            : // else
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.memory(song.cover!,
-              width: currentSong ? albumCoverSize*0.8 : albumCoverSize) // scale down a bit if it's a currently selected song
-            ),
+            displayAlbumCover(song, currentSong, screenHeight),
             
 
             // SONG NAME + ARTIST NAME

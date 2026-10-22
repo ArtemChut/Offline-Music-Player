@@ -181,7 +181,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                   valueListenable: loadedSongsNotifier, builder: (context, listOfSongs, child) {
                     
                     if (listOfSongs.isEmpty){
-                      return Center(child: Text("nooooo, add some songs!!"));
+                      return Center(child: Text("nooooo, your song catalogue is empty, add some songs!!"));
                     }
 
                     return Listener(
@@ -242,7 +242,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
                                           Text("Change song's name"),
-                                          Icon(Icons.pest_control_rodent_rounded)
+                                          Icon(Icons.abc_rounded)
                                         ],
                                       ),
                                     ),
@@ -294,7 +294,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                   case "artist":
                                     changeSongProps("artist", song, context, setState);
                                   case "albumCover":
-                                    changeAlbumCover();
+                                    changeAlbumCover(song, setState);
                                 }
                               },
 

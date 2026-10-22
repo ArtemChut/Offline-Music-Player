@@ -5,6 +5,7 @@ class Song {
   String name;
   String artist;
   Uint8List? cover;
+  String? alteredAlbumCoverPath;
   final String path;
   bool isPlaying;
 
@@ -14,6 +15,7 @@ class Song {
     required this.artist,
     this.cover,
     this.isPlaying = false,
+    this.alteredAlbumCoverPath
   });
 
   Map<String, dynamic> toJson() {
@@ -25,6 +27,7 @@ class Song {
       'cover': cover == null
           ? null
           : base64Encode(cover!),
+      'alteredAlbumCoverPath': alteredAlbumCoverPath
     };
   }
 
@@ -37,6 +40,7 @@ class Song {
       cover: json['cover'] == null
           ? null
           : base64Decode(json['cover'] as String),
+      alteredAlbumCoverPath: json['alteredAlbumCoverPath'] as String?
     );
   }
 }
