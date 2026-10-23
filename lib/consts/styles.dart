@@ -42,42 +42,76 @@ class Texts {
 }
 
 
+
 // CHECKING WHETHER A SONG HAS AN ALBUM COVER, IF YES LOAD IT, OTHERWISE - LOAD A BASIC PHOTO
 ClipRRect displayAlbumCover(song, currentSong, screenHeight) {
+
   // if a song has no album cover
   if (song.cover == null && song.alteredAlbumCoverPath == null){
-    print("god fucking damn it");
+    // load a pre-installed img
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: SvgPicture.asset("assets/images/heart.svg",
-      width: currentSong ? screenHeight*0.8*0.4 : albumCoverSize) // scale down a bit if it's a currently selected song
+      child: SvgPicture.asset("assets/images/musicNote.svg",
+      colorFilter: ColorFilter.mode(
+          isLightModeNotifier.value ?
+          const Color.fromARGB(57, 0, 0, 0) : const Color.fromARGB(40, 194, 194, 194),
+        BlendMode.srcIn,
+      ),
+      width: currentSong ? screenHeight*0.8*0.3 : albumCoverSize
+    ) // scale down a bit if it's a currently selected song
     );
   }
+  // if a song has an album cover
   else{
+    // if the album cover wasn't manually put in by a user (not a path to an img)
     if (song.alteredAlbumCoverPath == null){
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Image.memory(song.cover!,
-        width: currentSong ? albumCoverSize*0.8 : albumCoverSize) // scale down a bit if it's a currently selected song
+          width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
+          height: currentSong ? albumCoverSize*0.8 : albumCoverSize,
+          fit: BoxFit.cover, // make sure album cover img is a square
+        ) // scale down a bit if it's a currently selected song
       );
     }
+    // if it is a path to an img that was manually loaded by a user
     else{
-      if (song.alteredAlbumCoverPath.endsWith(".svg")){
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: SvgPicture.file(File(song.alteredAlbumCoverPath!),
-            width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
-          ) // scale down a bit if it's a currently selected song
-        );
+      // if a path still exists (didnt get deleted)
+      if (File(song.alteredAlbumCoverPath).existsSync()){
+        // if an img is in .svg format
+        if (song.alteredAlbumCoverPath.endsWith(".svg")){
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SvgPicture.file(File(song.alteredAlbumCoverPath!),
+              width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
+            ) // scale down a bit if it's a currently selected song
+          );
+        }
+        // if an img is in .jpg/.png format
+        else{
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.file(File(song.alteredAlbumCoverPath!),
+              width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
+              height: currentSong ? albumCoverSize*0.8 : albumCoverSize,
+              fit: BoxFit.cover, // make sure user's image is a square
+            ) // scale down a bit if it's a currently selected song
+          );
+        }
       }
+      // if a path was deleted or just doesnt work
       else{
+        // load a pre-installed img
         return ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.file(File(song.alteredAlbumCoverPath!),
-            width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
-            height: currentSong ? albumCoverSize*0.8 : albumCoverSize,
-            fit: BoxFit.cover,
-          ) // scale down a bit if it's a currently selected song
+          child: SvgPicture.asset("assets/images/musicNote.svg",
+          colorFilter: ColorFilter.mode(
+            isLightModeNotifier.value ?
+          const Color.fromARGB(57, 0, 0, 0) : const Color.fromARGB(40, 194, 194, 194),
+          BlendMode.srcIn,
+        ),
+          width: currentSong ? screenHeight*0.8*0.3 : albumCoverSize
+        ) // scale down a bit if it's a currently selected song
         );
       }
     }
