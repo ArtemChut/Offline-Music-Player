@@ -15,6 +15,7 @@ Future<void> changeSongProps(String type, song, BuildContext context, void Funct
       title: const Text("Change song's props"),
       content: TextField(
         controller: controller,
+        maxLength: 40,
         decoration: InputDecoration(
           labelText: labelText,
         ),
@@ -48,7 +49,7 @@ Future<void> changeSongProps(String type, song, BuildContext context, void Funct
   }
 
 
-
+  await saveAllSongs(); // acc saves all the changes
   setState(() {
     // UPADING THE UI
   },);
@@ -79,5 +80,6 @@ Future<void> changeAlbumCover(song, void Function(VoidCallback) setState) async 
   song.alteredAlbumCoverPath = result.paths[0];
   await saveAllSongs();
 
+  // updating the ui
   setState((){});
 }
