@@ -15,7 +15,7 @@ Future<void> changeSongProps(String type, song, BuildContext context, void Funct
       title: const Text("Change song's props"),
       content: TextField(
         controller: controller,
-        maxLength: 40,
+        maxLength: 24,
         decoration: InputDecoration(
           labelText: labelText,
         ),
