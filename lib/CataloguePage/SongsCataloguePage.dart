@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/sideFiles/changingSongProps.dart';
 
@@ -20,6 +21,9 @@ import '../SettingsPage.dart';
 /* ------------------------------
        ALL THE VARIABLES
 -------------------------------*/
+
+List<int> selectedSongs = []; // saves indexes of all songs that are selected
+bool selecting = false; // whether a user is selecting multiple songs or not
 
 
 int songsCount = 0;
@@ -119,247 +123,314 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
 
 
 
-    return ValueListenableBuilder(
-      valueListenable: isLightModeNotifier,
-      builder: (context, isLightMode, child) {
-        loadColours(); // changes colour of cards if the theme colour changes
-        // APPBAR
-        return Scaffold(
-          appBar: customAppBar(
-            elements: [
-              IconButton(
-                style: IconButtonStyles.iconButton,
-                onPressed: () async {
-                  isLightModeNotifier.value = !isLightModeNotifier.value;
-                  saveThemeColour();
-                },
-                icon: Icon(
-                  isLightMode ? Icons.light_mode : Icons.dark_mode,
-                ),
-              ),
-
-              IconButton(
-                style: IconButtonStyles.iconButton,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return const SettingsPage();
-                      }
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.settings),
-              ),
-            ]
-          ),
-
-
-          // MAIN BODY
-          body: Padding(padding: EdgeInsetsGeometry.symmetric(
-            vertical: screenHeight/23,
-            horizontal: screenWidth/20
-          ),
-
-
-            child: Center(
-              // EVRYTHING INSIDE THE PAGE
-              child: Container(
-                width: double.maxFinite,
-                height: screenHeight - (screenHeight/23*2)-114, // thingy in the brackets is how big the padding is, 114 is the height of a bottom nav bar
-                padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth*0.06,
-                  vertical: screenHeight*0.05
-                ),
-                decoration: BoxDecoration(
-                  color: cardBackgroundColour,
-                  borderRadius: BorderRadius.circular(20) 
-                ),
-                
-                child: ValueListenableBuilder(
-                  valueListenable: loadedSongsNotifier, builder: (context, listOfSongs, child) {
-                    
-                    if (listOfSongs.isEmpty){
-                      return Center(child: Text("nooooo, your song catalogue is empty, add some songs!!"));
-                    }
-
-                    return Listener(
-                        onPointerSignal: (event) {
-                          if (event is PointerScrollEvent && scrollController.hasClients){
-                            scrollController.jumpTo((scrollController.offset + (event.scrollDelta.dy > 0 ? cardWidth/2 : -cardWidth/2))
-                              .clamp(
-                                0.0,
-                                scrollController.position.maxScrollExtent,
-                              ),
-                            );
-                          }
-                        },
-
-                        // the cards themself
-                        child: ListView.builder(
-                          itemCount: listOfSongs.length,
-                          scrollDirection: Axis.horizontal,
-                          controller: scrollController,
-                          itemBuilder: (context, index) {
-
-                            final currSongIndexReversed = songsCount-1-index; // we add songs right to left, so we reverse the i
-                        
-                            final song = listOfSongs[currSongIndexReversed];
-
-                          
-                            return GestureDetector(
-                              // single left mouse click
-                              onTap: () async {
-                                await changeSong(index, loadedSongsNotifier); // changing the song currently playing
-                                setState(() {
-                                  // mb, ik it looks stupid but otherwise the update (new currently selected song) isnt being properly displayed
-                                  currentSongIndex = currentSongIndex;
-                                });
-                              },
-
-                              // right mouse click
-                              onSecondaryTapUp: (details) async {
-                                // get the position of the mouse
-                                final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-
-                                final mousePosition = overlay.globalToLocal(details.globalPosition);
-
-                                // show the popup menu at the mouse position
-                                final action = await showMenu<String>(
-                                  context: context,
-                                  position: RelativeRect.fromLTRB(
-                                    mousePosition.dx,
-                                    mousePosition.dy,
-                                    overlay.size.width - mousePosition.dx,
-                                    overlay.size.height - mousePosition.dy,
-                                  ),
-                                  items: [
-                                    // change song's name button
-                                    const PopupMenuItem(
-                                      value: 'name',
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text("Change song's name"),
-                                          Icon(Icons.abc_rounded)
-                                        ],
-                                      ),
-                                    ),
-
-                                    // change name of the artist button
-                                    const PopupMenuItem(
-                                      value: 'artist',
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text("Change song's artist name"),
-                                          Icon(Icons.person_3_outlined)
-                                        ],
-                                      ),
-                                    ),
-
-                                    // change the album cover button
-                                    const PopupMenuItem(
-                                      value: 'albumCover',
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text('Change the album cover'),
-                                          Icon(Icons.album)
-                                        ],
-                                      ),
-                                    ),
-
-                                    // delete a song button
-                                    const PopupMenuItem(
-                                      value: 'delete',
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Text('Delete song'),
-                                          Icon(Icons.delete, color: Colors.red)
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                );
-
-                                // handles the selected action
-                                switch (action) {
-                                  case "delete":
-                                    deleteSong(song, songsCount-currSongIndexReversed-1);
-                                  case "name":
-                                    changeSongProps("name", song, context, setState);
-                                  case "artist":
-                                    changeSongProps("artist", song, context, setState);
-                                  case "albumCover":
-                                    changeAlbumCover(song, setState);
-                                }
-                              },
-
-
-          
-                              child: SizedBox(
-                                width: cardWidth,
-                                child: Card(
-                                  color: index == currentSongIndex ? selectedCardColour : cardColour,
-
-                                  child: Padding(
-                                    padding: EdgeInsetsGeometry.symmetric(
-                                      vertical: 12,
-                                      horizontal: cardWidth*0.05
-                                    ),
-                                    
-                                    // if a song is currently chosen - display extra stats
-                                    child:
-                                    index == currentSongIndex ? 
-                                    // a song thats currently delected, has skip/pause buttons and more
-                                    SongCard(
-                                      setState,
-                                      albumCoverSize: albumCoverSize,
-                                      cardColour: cardColour,
-                                      cardWidth: cardWidth,
-                                      currentSongIndex: currentSongIndex,
-                                      index: index,
-                                      screenHeight: screenHeight,
-                                      selectedCardColour: selectedCardColour,
-                                      song: song,
-                                      currentSong: true,
-                                    ) :
-                                    // a normal song card (not currently playing) + only shows song's name, artist, album cover
-                                    SongCard(
-                                      setState,
-                                      albumCoverSize: albumCoverSize,
-                                      cardColour: cardColour,
-                                      cardWidth: cardWidth,
-                                      currentSongIndex: currentSongIndex,
-                                      index: index,
-                                      screenHeight: screenHeight,
-                                      selectedCardColour: selectedCardColour,
-                                      song: song,
-                                      currentSong: false
-                                    )
-                                  ),
-                                ),
-                              ),
-                            );
-                        },),
-                    );
-                  },
-                ),
-              ),
-          ),
-        ),
-
-
-
-        // BOTTOM NAV BAR TO TRANSFER BETWEEN PAGES
-        bottomNavigationBar: BottomNavBar(
-          currentIndex: 0
-        )
-      );
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape){
+          setState(() {
+            selecting = false;
+            selectedSongs.clear();
+          });
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
       },
+      child: GestureDetector(
+        onTap:() {
+          setState(() {
+            selecting = false;
+            selectedSongs.clear();
+          });
+        },
+        child: ValueListenableBuilder(
+          valueListenable: isLightModeNotifier,
+          builder: (context, isLightMode, child) {
+            loadColours(); // changes colour of cards if the theme colour changes
+            // APPBAR
+            return Scaffold(
+              appBar: customAppBar(
+                elements: [
+                  IconButton(
+                    style: IconButtonStyles.iconButton,
+                    onPressed: () async {
+                      isLightModeNotifier.value = !isLightModeNotifier.value;
+                      saveThemeColour();
+                    },
+                    icon: Icon(
+                      isLightMode ? Icons.light_mode : Icons.dark_mode,
+                    ),
+                  ),
+        
+                  IconButton(
+                    style: IconButtonStyles.iconButton,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return const SettingsPage();
+                          }
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.settings),
+                  ),
+                ]
+              ),
+        
+        
+              // MAIN BODY
+              body: Padding(padding: EdgeInsetsGeometry.symmetric(
+                vertical: screenHeight/23,
+                horizontal: screenWidth/20
+              ),
+        
+        
+                child: Center(
+                  // EVRYTHING INSIDE THE PAGE
+                  child: Container(
+                    width: double.maxFinite,
+                    height: screenHeight - (screenHeight/23*2)-114, // thingy in the brackets is how big the padding is, 114 is the height of a bottom nav bar
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth*0.06,
+                      vertical: screenHeight*0.05
+                    ),
+                    decoration: BoxDecoration(
+                      color: cardBackgroundColour,
+                      borderRadius: BorderRadius.circular(20) 
+                    ),
+                    
+                    child: ValueListenableBuilder(
+                      valueListenable: loadedSongsNotifier, builder: (context, listOfSongs, child) {
+                        
+                        if (listOfSongs.isEmpty){
+                          return Center(child: Text("nooooo, your song catalogue is empty, add some songs!!"));
+                        }
+        
+                        return Listener(
+                            onPointerSignal: (event) {
+                              if (event is PointerScrollEvent && scrollController.hasClients){
+                                scrollController.jumpTo((scrollController.offset + (event.scrollDelta.dy > 0 ? cardWidth/2 : -cardWidth/2))
+                                  .clamp(
+                                    0.0,
+                                    scrollController.position.maxScrollExtent,
+                                  ),
+                                );
+                              }
+                            },
+        
+                            // the cards themself
+                            child: ListView.builder(
+                              itemCount: listOfSongs.length,
+                              scrollDirection: Axis.horizontal,
+                              controller: scrollController,
+                              itemBuilder: (context, index) {
+        
+                                final currSongIndexReversed = songsCount-1-index; // we add songs right to left, so we reverse the i
+                            
+                                final song = listOfSongs[currSongIndexReversed];
+        
+                              
+                                return GestureDetector(
+                                    // single left mouse click
+                                    onTap: () async {
+                                      await changeSong(index, loadedSongsNotifier); // changing the song currently playing
+                                      setState(() {
+                                        // mb, ik it looks stupid but otherwise the update (new currently selected song) isnt being properly displayed
+                                        currentSongIndex = currentSongIndex;
+                                      });
+                                    },
+                                  
+                                    // right mouse click
+                                    onSecondaryTapUp: (details) async {
+                                      // get the position of the mouse
+                                      final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                                  
+                                      final mousePosition = overlay.globalToLocal(details.globalPosition);
+                                  
+                                      // show the popup menu at the mouse position
+                                      final action = await showMenu<String>(
+                                        context: context,
+                                        position: RelativeRect.fromLTRB(
+                                          mousePosition.dx,
+                                          mousePosition.dy,
+                                          overlay.size.width - mousePosition.dx,
+                                          overlay.size.height - mousePosition.dy,
+                                        ),
+                                        items: [
+                                          // change song's name button
+                                          const PopupMenuItem(
+                                            value: 'name',
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Text("Change song's name"),
+                                                Icon(Icons.abc_rounded)
+                                              ],
+                                            ),
+                                          ),
+                                  
+                                          // change name of the artist button
+                                          const PopupMenuItem(
+                                            value: 'artist',
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Text("Change song's artist name"),
+                                                Icon(Icons.person_3_outlined)
+                                              ],
+                                            ),
+                                          ),
+                                  
+                                          // change the album cover button
+                                          const PopupMenuItem(
+                                            value: 'albumCover',
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Text('Change the album cover'),
+                                                Icon(Icons.album)
+                                              ],
+                                            ),
+                                          ),
+        
+                                          // allows to select multiple songs
+                                          const PopupMenuItem(
+                                            value: 'select',
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Text('Select multiple songs'),
+                                                Icon(Icons.add_circle_outline)
+                                              ],
+                                            ),
+                                          ),
+                                  
+                                          // delete a song button
+                                          const PopupMenuItem(
+                                            value: 'delete',
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Text('Delete song'),
+                                                Icon(Icons.delete, color: Colors.red)
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                  
+                                      // handles the selected action
+                                      switch (action) {
+                                        case "delete":
+                                        if (selecting){
+                                          for (int index in selectedSongs){
+                                            deleteSong(loadedSongsNotifier.value[index], songsCount-currSongIndexReversed-1);
+                                          }
+                                        }
+                                          deleteSong(song, songsCount-currSongIndexReversed-1);
+                                        case "name":
+                                          changeSongProps("name", song, context, setState);
+                                        case "artist":
+                                          changeSongProps("artist", song, context, setState);
+                                        case "albumCover":
+                                          changeAlbumCover(song, setState);
+                                        case "select":
+                                          setState(() {
+                                            selecting = true;
+                                          });
+                                      }
+                                    },
+                                  
+                                  
+                                            
+                                    child: SizedBox(
+                                      width: cardWidth,
+                                      child: Card(
+                                        color: index == currentSongIndex ? selectedCardColour : cardColour,
+                                  
+                                        child: Stack(
+                                          children: [
+                                          // allows to select multiple songs
+                                          if (selecting)
+                                            IconButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  // remove from a list of selected songs if the song has already been selected
+                                                  if (selectedSongs.contains(index)) {
+                                                    selectedSongs.removeAt(index);
+                                                  }
+                                                  // add to a list of selected songs if it's not inside the list yet
+                                                  else {
+                                                    selectedSongs.add(index);
+                                                  }
+                                                });
+                                              },
+                                              icon: Icon(
+                                                selectedSongs.contains(index)
+                                                    ? Icons.check_circle // if selected
+                                                    : Icons.circle_outlined, // if not selected
+                                                size: screenHeight*0.8*0.05
+                                              ),
+                                            ),
+        
+                                            Padding(
+                                            padding: EdgeInsetsGeometry.symmetric(
+                                              vertical: 12,
+                                              horizontal: cardWidth*0.05
+                                            ),
+                                            
+                                            child:
+                                              // if a song is a song currently playing
+                                              index == currentSongIndex
+                                              ? SongCard(
+                                                  setState,
+                                                  albumCoverSize: albumCoverSize,
+                                                  cardColour: cardColour,
+                                                  cardWidth: cardWidth,
+                                                  currentSongIndex: currentSongIndex,
+                                                  index: index,
+                                                  screenHeight: screenHeight,
+                                                  selectedCardColour: selectedCardColour,
+                                                  song: song,
+                                                  currentSong: true,
+                                                )
+                                              // if a song is a song not currently playing
+                                              : SongCard(
+                                                  setState,
+                                                  albumCoverSize: albumCoverSize,
+                                                  cardColour: cardColour,
+                                                  cardWidth: cardWidth,
+                                                  currentSongIndex: currentSongIndex,
+                                                  index: index,
+                                                  screenHeight: screenHeight,
+                                                  selectedCardColour: selectedCardColour,
+                                                  song: song,
+                                                  currentSong: false,
+                                                ),
+                                          ),]
+                                        ),
+                                      ),
+                                    ),
+                                );
+                            },),
+                        );
+                      },
+                    ),
+                  ),
+              ),
+            ),
+        
+        
+        
+            // BOTTOM NAV BAR TO TRANSFER BETWEEN PAGES
+            bottomNavigationBar: BottomNavBar(
+              currentIndex: 0
+            )
+          );
+          },
+        ),
+      ),
     );
   }
 }

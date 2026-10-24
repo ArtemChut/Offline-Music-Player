@@ -209,7 +209,7 @@ class BottomNavBar extends StatelessWidget {
           label: 'Import',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.playlist_play_rounded),
+          icon: Icon(Icons.library_music_outlined),
           label: 'Playlists',
         ),
         BottomNavigationBarItem(

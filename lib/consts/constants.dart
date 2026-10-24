@@ -5,4 +5,5 @@ class KConstant{
   static const String currentSongKey = "currentSongKey"; // saving the index of a song currently playing
   static const String timePlayedKey = "timePlyedKey"; // saving time in ms that a song has already been played for
   static const String scrollBarPosKey = "scrollBarPosKey"; // x coordinate of our carousel
+  static const String allPlaylistsKey = "allPlaylistsKey"; // saved indexes of all the songs that r put inside playlists
 }

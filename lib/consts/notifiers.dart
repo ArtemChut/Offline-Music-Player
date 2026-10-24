@@ -8,3 +8,4 @@ ValueNotifier<List<Song>> loadedSongsNotifier = ValueNotifier<List<Song>>([]); /
 ValueNotifier<int?> currentSongNotifier = ValueNotifier<int?>(null); // index of a song currently playing
 ValueNotifier<int> timePlayedNotifier = ValueNotifier(0); // time in ms that a song's been played for
 ValueNotifier<double> scrollBarPosNotifier = ValueNotifier(0); // x coordinate of our carousel
+ValueNotifier<List<List<int>>> allPlaylistsNotifier = ValueNotifier([]); // saved indexes of all the songs that r put inside playlists

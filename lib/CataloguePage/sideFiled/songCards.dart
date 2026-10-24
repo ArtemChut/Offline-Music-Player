@@ -41,10 +41,10 @@ Padding SongCard( void Function(VoidCallback) setState,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               // name of the song
-              Texts.simpleSizedText(text: song.name, fontSize: nameSize),
+              Texts.simpleSizedText(text: song.name, fontSize: currentSong ? nameSize-4 : nameSize),
 
               // artist name
-              Texts.simpleSizedText(text: song.artist, fontSize: artistSize+4),
+              Texts.simpleSizedText(text: song.artist, fontSize: currentSong ? artistSize-4 : artistSize),
 
               // a little margin to push song name + artist name higher up (closer to the center)
               SizedBox(height: screenHeight*0.6*0.08*0.6)
