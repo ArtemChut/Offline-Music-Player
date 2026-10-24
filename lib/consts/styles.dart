@@ -221,3 +221,82 @@ class BottomNavBar extends StatelessWidget {
   }
 }
 
+
+List<PopupMenuEntry<String>> popUps(bool selecting) {
+  if (!selecting){
+    return [
+    // change song's name button
+      const PopupMenuItem(
+        value: 'name',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text("Change song's name"),
+            Icon(Icons.abc_rounded)
+          ],
+        ),
+      ),
+
+      // change name of the artist button
+      const PopupMenuItem(
+        value: 'artist',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text("Change song's artist name"),
+            Icon(Icons.person_3_outlined)
+          ],
+        ),
+      ),
+
+      // change the album cover button
+      const PopupMenuItem(
+        value: 'albumCover',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text('Change the album cover'),
+            Icon(Icons.album)
+          ],
+        ),
+      ),
+
+      // allows to select multiple songs
+      const PopupMenuItem(
+        value: 'select',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text('Select multiple songs'),
+            Icon(Icons.add_circle_outline)
+          ],
+        ),
+      ),
+
+      // delete a song button
+      const PopupMenuItem(
+        value: 'delete',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text('Delete song'),
+            Icon(Icons.delete, color: Colors.red)
+          ],
+        ),
+      ),];
+  }
+  else{
+    return [// delete a song button
+      const PopupMenuItem(
+        value: 'delete',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text('Delete song'),
+            Icon(Icons.delete, color: Colors.red)
+          ],
+        ),
+      ),];
+  }
+}
+

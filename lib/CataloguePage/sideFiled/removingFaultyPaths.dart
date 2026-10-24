@@ -10,6 +10,7 @@ import '../SongsCataloguePage.dart';
 import '../../sideFiles/songs.dart';
 
 
+// makes sure that after deleting a song, index of a currenly playing song stays the same
 void adjustCurrSongIndex(index) async {
   if (currentSongIndex == null) return;
 

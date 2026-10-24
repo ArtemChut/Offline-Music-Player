@@ -126,7 +126,7 @@ String formatDuration(String time){
 
 
 // when a user purposefuly deletes a song
-Future<void> deleteSong(song, index) async {
+Future<void> deleteSong(song, int index) async {
   final songs = List.of(loadedSongsNotifier.value);
   songs.remove(song);
   loadedSongsNotifier.value = songs;

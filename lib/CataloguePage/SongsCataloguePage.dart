@@ -257,78 +257,33 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                           overlay.size.width - mousePosition.dx,
                                           overlay.size.height - mousePosition.dy,
                                         ),
+                                        
+                                        // DISPLAYING THE POP UPS LIST THAT ALLOW TO MODIFY PROPERTIES OF A SONG
                                         items: [
-                                          // change song's name button
-                                          const PopupMenuItem(
-                                            value: 'name',
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Text("Change song's name"),
-                                                Icon(Icons.abc_rounded)
-                                              ],
-                                            ),
-                                          ),
-                                  
-                                          // change name of the artist button
-                                          const PopupMenuItem(
-                                            value: 'artist',
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Text("Change song's artist name"),
-                                                Icon(Icons.person_3_outlined)
-                                              ],
-                                            ),
-                                          ),
-                                  
-                                          // change the album cover button
-                                          const PopupMenuItem(
-                                            value: 'albumCover',
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Text('Change the album cover'),
-                                                Icon(Icons.album)
-                                              ],
-                                            ),
-                                          ),
-        
-                                          // allows to select multiple songs
-                                          const PopupMenuItem(
-                                            value: 'select',
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Text('Select multiple songs'),
-                                                Icon(Icons.add_circle_outline)
-                                              ],
-                                            ),
-                                          ),
-                                  
-                                          // delete a song button
-                                          const PopupMenuItem(
-                                            value: 'delete',
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Text('Delete song'),
-                                                Icon(Icons.delete, color: Colors.red)
-                                              ],
-                                            ),
-                                          ),
-                                        ],
+                                          ...popUps(selecting)
+                                        ]
                                       );
                                   
                                       // handles the selected action
                                       switch (action) {
                                         case "delete":
-                                        if (selecting){
-                                          for (int index in selectedSongs){
-                                            deleteSong(loadedSongsNotifier.value[index], songsCount-currSongIndexReversed-1);
+                                          // if selecting multiple songs
+                                          if (selecting){
+                                            selectedSongs.sort((a, b) => b.compareTo(a)); // sort the list from largest index to smallest in order not to get an our of range error
+
+                                            // removing each song one by one
+                                            for (int song_index in selectedSongs){
+                                              deleteSong(loadedSongsNotifier.value[loadedSongsNotifier.value.length-1-song_index], loadedSongsNotifier.value.length-1-song_index);
+                                            }
+                                            setState(() {
+                                              selecting = false;
+                                              selectedSongs.clear();
+                                            });
                                           }
-                                        }
-                                          deleteSong(song, songsCount-currSongIndexReversed-1);
+                                          // if deleting a single song
+                                          else{
+                                            deleteSong(song, index);
+                                          }
                                         case "name":
                                           changeSongProps("name", song, context, setState);
                                         case "artist":
@@ -358,7 +313,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                                 setState(() {
                                                   // remove from a list of selected songs if the song has already been selected
                                                   if (selectedSongs.contains(index)) {
-                                                    selectedSongs.removeAt(index);
+                                                    selectedSongs.remove(index);
                                                   }
                                                   // add to a list of selected songs if it's not inside the list yet
                                                   else {
