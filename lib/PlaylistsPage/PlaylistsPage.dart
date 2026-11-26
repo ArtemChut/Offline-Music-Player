@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:music_player/CataloguePage/SongsCataloguePage.dart';
 
 import 'package:music_player/CataloguePage/sideFiled/songInteraction.dart';
@@ -160,7 +161,17 @@ class _PlatlistsPage extends State<PlaylistsPage> {
                         creatingPlaylist = true;
                       });
                   },
-                  icon: Icon(Icons.create_new_folder_outlined)),
+                  icon: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SvgPicture.asset("assets/images/highlight.svg", width: screenWidth*0.07,),
+
+                      Transform.scale(
+                      child: Icon(Icons.create_new_folder_outlined),
+                      scale: 2,
+                    ),
+                  ])
+                  ),
         
                   IconButton(
                     style: IconButtonStyles.iconButton,
