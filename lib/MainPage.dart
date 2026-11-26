@@ -49,6 +49,7 @@ void main() async {
 
   //clearSongs(); // for debugging purposes
   //clearCurr();
+
   //clearTime();
 
   // loading a theme colour

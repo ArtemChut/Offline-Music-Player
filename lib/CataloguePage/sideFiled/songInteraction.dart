@@ -10,7 +10,7 @@ import '../SongsCataloguePage.dart';
 import '../../sideFiles/savingPrefs.dart';
 
 
-Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier) async {  
+Future<void> changeSong(int index, ValueNotifier loadedSongsNotifier, scrollController) async {  
 
   int direction = 1;
   if (currentSongIndex != null){
@@ -85,10 +85,10 @@ void playPauseSong(song, bool playing, int index) async {
   }
 }
 
-void prevNextSong(String type, void Function(VoidCallback) setState) async {
+void prevNextSong(String type, void Function(VoidCallback) setState, scrollController) async {
   // if skipping to the next song
   if (type == "next"){
-    await changeSong((currentSongIndex! + 1) % songsCount, loadedSongsNotifier);
+    await changeSong((currentSongIndex! + 1) % songsCount, loadedSongsNotifier, scrollController);
     await saveCurrSong(currentSongIndex);
 
     // update the visuals (pause/play buttons + current song card)
@@ -98,7 +98,7 @@ void prevNextSong(String type, void Function(VoidCallback) setState) async {
   // if going back to the previous song
   else{
     if (currentSongIndex! > 0){ // dont allow to go out of bounds (-1...)
-      await changeSong(currentSongIndex! - 1, loadedSongsNotifier);
+      await changeSong(currentSongIndex! - 1, loadedSongsNotifier, scrollController);
       await saveCurrSong(currentSongIndex);
       
       // update the visuals (pause/play buttons + current song card)
@@ -107,7 +107,7 @@ void prevNextSong(String type, void Function(VoidCallback) setState) async {
 
     // if a user clicks on a "previous song" button when it's already the first song then just re-start it
     else{
-      await changeSong(currentSongIndex!, loadedSongsNotifier);
+      await changeSong(currentSongIndex!, loadedSongsNotifier, scrollController);
 
       // update the visuals (pause/play button)
       setState(() { });
@@ -139,7 +139,7 @@ Future<void> deleteSong(song, int index) async {
 
 
 
-Future<void> restoreScrollPosition() async {
+Future<void> restoreScrollPosition(scrollController) async {
   await initLoadScrollBarPos();
 
   WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:music_player/CataloguePage/SongsCataloguePage.dart';
-import 'package:music_player/PlaylistsPage.dart';
+import 'package:music_player/PlaylistsPage/PlaylistsPage.dart';
+import 'package:music_player/SettingsPage.dart';
 
 import 'package:music_player/consts/notifiers.dart';
 import 'package:music_player/sideFiles/importSongs.dart';
@@ -44,30 +45,43 @@ class Texts {
 
 
 // CHECKING WHETHER A SONG HAS AN ALBUM COVER, IF YES LOAD IT, OTHERWISE - LOAD A BASIC PHOTO
-ClipRRect displayAlbumCover(song, currentSong, screenHeight) {
+
+// NOW THIS ALSO WORKS FOR PLAYLISTS SO IGNORE currentSong
+Widget displayAlbumCover(object, bool currentSong, double screenHeight, double albumCoverSize, String type) {
 
   // if a song has no album cover
-  if (song.cover == null && song.alteredAlbumCoverPath == null){
-    // load a pre-installed img
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: SvgPicture.asset("assets/images/musicNote.svg",
-      colorFilter: ColorFilter.mode(
-          isLightModeNotifier.value ?
-          const Color.fromARGB(57, 0, 0, 0) : const Color.fromARGB(40, 194, 194, 194),
-        BlendMode.srcIn,
-      ),
-      width: currentSong ? screenHeight*0.8*0.3 : albumCoverSize
-    ) // scale down a bit if it's a currently selected song
-    );
+  if (object.cover == null && object.alteredAlbumCoverPath == null){
+    // load a pre-installed img/icon
+
+    // if a playlist - display an add icon
+    if (type == "playlist"){
+      return Icon(
+        Icons.add_rounded,
+        size: albumCoverSize
+      ); // scale down a bit if it's a currently selected song
+    }
+    // if a song - load a pre-installed img
+    else{
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: SvgPicture.asset("assets/images/musicNote.svg",
+        colorFilter: ColorFilter.mode(
+            isLightModeNotifier.value ?
+            const Color.fromARGB(57, 0, 0, 0) : const Color.fromARGB(40, 194, 194, 194),
+          BlendMode.srcIn,
+        ),
+        width: currentSong ? screenHeight*0.8*0.3 : albumCoverSize
+      ) // scale down a bit if it's a currently selected song
+      );
+    }
   }
   // if a song has an album cover
   else{
     // if the album cover wasn't manually put in by a user (not a path to an img)
-    if (song.alteredAlbumCoverPath == null){
+    if (object.alteredAlbumCoverPath == null){
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Image.memory(song.cover!,
+        child: Image.memory(object.cover!,
           width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
           height: currentSong ? albumCoverSize*0.8 : albumCoverSize,
           fit: BoxFit.cover, // make sure album cover img is a square
@@ -77,12 +91,12 @@ ClipRRect displayAlbumCover(song, currentSong, screenHeight) {
     // if it is a path to an img that was manually loaded by a user
     else{
       // if a path still exists (didnt get deleted)
-      if (File(song.alteredAlbumCoverPath).existsSync()){
+      if (File(object.alteredAlbumCoverPath).existsSync()){
         // if an img is in .svg format
-        if (song.alteredAlbumCoverPath.endsWith(".svg")){
+        if (object.alteredAlbumCoverPath.endsWith(".svg")){
           return ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: SvgPicture.file(File(song.alteredAlbumCoverPath!),
+            child: SvgPicture.file(File(object.alteredAlbumCoverPath!),
               width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
             ) // scale down a bit if it's a currently selected song
           );
@@ -91,7 +105,7 @@ ClipRRect displayAlbumCover(song, currentSong, screenHeight) {
         else{
           return ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.file(File(song.alteredAlbumCoverPath!),
+            child: Image.file(File(object.alteredAlbumCoverPath!),
               width: currentSong ? albumCoverSize*0.8 : albumCoverSize,
               height: currentSong ? albumCoverSize*0.8 : albumCoverSize,
               fit: BoxFit.cover, // make sure user's image is a square
@@ -183,18 +197,18 @@ class BottomNavBar extends StatelessWidget {
       onTap: (index) async {
         switch (index){
           case 0:
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
               return const SongsCataloguePage();
             },));
           case 1:
             await loadSongs();
           case 2:
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return const PlaylistsPage();
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+              return const PlaylistsPage(addingTo: false, songs: []);
             },));
           case 3:
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return const PlaylistsPage();
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+              return const SettingsPage();
             },));
         }
       },
@@ -223,6 +237,7 @@ class BottomNavBar extends StatelessWidget {
 
 
 List<PopupMenuEntry<String>> popUps(bool selecting) {
+  // if a user is in a select mode and can't select multiple songs - allow it to change all the song's properties
   if (!selecting){
     return [
     // change song's name button
@@ -273,6 +288,18 @@ List<PopupMenuEntry<String>> popUps(bool selecting) {
         ),
       ),
 
+      // adding to a playlist
+      const PopupMenuItem(
+        value: 'addToPlaylist',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text('Add to a playlist'),
+            Icon(Icons.playlist_add_rounded)
+          ],
+        ),
+      ),
+
       // delete a song button
       const PopupMenuItem(
         value: 'delete',
@@ -285,8 +312,23 @@ List<PopupMenuEntry<String>> popUps(bool selecting) {
         ),
       ),];
   }
+
   else{
-    return [// delete a song button
+    // if a user is not in a select mode and can select multiple songs - only allow it to delete those songs and add them to a platlist
+    return [
+      // adding to a playlist
+      const PopupMenuItem(
+        value: 'addToPlaylist',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text('Add to a playlist'),
+            Icon(Icons.playlist_add_rounded)
+          ],
+        ),
+      ),
+
+      // delete a song button
       const PopupMenuItem(
         value: 'delete',
         child: Row(

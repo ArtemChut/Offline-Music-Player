@@ -14,6 +14,7 @@ import '../consts/styles.dart';
 import 'sideFiled/songCards.dart';
 
 import '../SettingsPage.dart';
+import '../PlaylistsPage/PlaylistsPage.dart';
 
 
 
@@ -53,9 +54,6 @@ void loadColours(){
 // ALLOWS TO PLAY MUSIC FILES
 final AudioPlayer audioPlayer = AudioPlayer();
 
-// ALLOWS TO SCROLL THROUGH THE SONGS CAROUSEL
-ScrollController scrollController = ScrollController();
-
 
 class SongsCataloguePage extends StatefulWidget {
   const SongsCataloguePage({super.key});
@@ -65,6 +63,8 @@ class SongsCataloguePage extends StatefulWidget {
 }
 
 class _SongsCatalogueState extends State<SongsCataloguePage> {
+  // ALLOWS TO SCROLL THROUGH THE SONGS CAROUSEL
+  ScrollController scrollController = ScrollController(); 
   
   @override
   void initState() {
@@ -85,7 +85,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
     await initLoadCurrSong();
     currentSongIndex = currentSongNotifier.value;
 
-    await restoreScrollPosition();
+    await restoreScrollPosition(scrollController);
 
 
     if (currentSongIndex != null){
@@ -110,8 +110,6 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
   void dispose() {
     scrollController.dispose();
 
-    audioPlayer.dispose();
-
     super.dispose();
   }
 
@@ -122,7 +120,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
     final double screenWidth = MediaQuery.of(context).size.width;
 
 
-
+    
     return Focus(
       autofocus: true,
       onKeyEvent: (node, event) {
@@ -204,7 +202,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                       valueListenable: loadedSongsNotifier, builder: (context, listOfSongs, child) {
                         
                         if (listOfSongs.isEmpty){
-                          return Center(child: Text("nooooo, your song catalogue is empty, add some songs!!"));
+                          return Center(child: Text("nooooo, your song catalogue is empty, add some songs right now by clicking a bottom nav bar button!!"));
                         }
         
                         return Listener(
@@ -234,7 +232,7 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                 return GestureDetector(
                                     // single left mouse click
                                     onTap: () async {
-                                      await changeSong(index, loadedSongsNotifier); // changing the song currently playing
+                                      await changeSong(index, loadedSongsNotifier, scrollController); // changing the song currently playing
                                       setState(() {
                                         // mb, ik it looks stupid but otherwise the update (new currently selected song) isnt being properly displayed
                                         currentSongIndex = currentSongIndex;
@@ -286,10 +284,24 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                           }
                                         case "name":
                                           changeSongProps("name", song, context, setState);
+
                                         case "artist":
                                           changeSongProps("artist", song, context, setState);
+
                                         case "albumCover":
                                           changeAlbumCover(song, setState);
+
+                                        case "addToPlaylist":
+                                          final List<int> songsToPass = selectedSongs.isEmpty ? [index] : selectedSongs;
+
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                            return PlaylistsPage(addingTo: true, songs: songsToPass);
+                                          },));
+                                          setState(() {
+                                            selecting = false; // user is no longer selecting any songs
+                                            selectedSongs = [];
+                                          });
+
                                         case "select":
                                           setState(() {
                                             selecting = true;
@@ -329,40 +341,42 @@ class _SongsCatalogueState extends State<SongsCataloguePage> {
                                               ),
                                             ),
         
-                                            Padding(
-                                            padding: EdgeInsetsGeometry.symmetric(
-                                              vertical: 12,
-                                              horizontal: cardWidth*0.05
-                                            ),
-                                            
-                                            child:
-                                              // if a song is a song currently playing
-                                              index == currentSongIndex
-                                              ? SongCard(
-                                                  setState,
-                                                  albumCoverSize: albumCoverSize,
-                                                  cardColour: cardColour,
-                                                  cardWidth: cardWidth,
-                                                  currentSongIndex: currentSongIndex,
-                                                  index: index,
-                                                  screenHeight: screenHeight,
-                                                  selectedCardColour: selectedCardColour,
-                                                  song: song,
-                                                  currentSong: true,
-                                                )
-                                              // if a song is a song not currently playing
-                                              : SongCard(
-                                                  setState,
-                                                  albumCoverSize: albumCoverSize,
-                                                  cardColour: cardColour,
-                                                  cardWidth: cardWidth,
-                                                  currentSongIndex: currentSongIndex,
-                                                  index: index,
-                                                  screenHeight: screenHeight,
-                                                  selectedCardColour: selectedCardColour,
-                                                  song: song,
-                                                  currentSong: false,
-                                                ),
+                                          Padding(
+                                          padding: EdgeInsetsGeometry.symmetric(
+                                            vertical: 12,
+                                            horizontal: cardWidth*0.05
+                                          ),
+                                          
+                                          child:
+                                            // if a song is a song currently playing
+                                            index == currentSongIndex
+                                            ? SongCard(
+                                                setState,
+                                                albumCoverSize: albumCoverSize,
+                                                cardColour: cardColour,
+                                                cardWidth: cardWidth,
+                                                currentSongIndex: currentSongIndex,
+                                                index: index,
+                                                screenHeight: screenHeight,
+                                                selectedCardColour: selectedCardColour,
+                                                song: song,
+                                                currentSong: true,
+                                                scrollController: scrollController
+                                              )
+                                            // if a song is a song not currently playing
+                                            : SongCard(
+                                                setState,
+                                                albumCoverSize: albumCoverSize,
+                                                cardColour: cardColour,
+                                                cardWidth: cardWidth,
+                                                currentSongIndex: currentSongIndex,
+                                                index: index,
+                                                screenHeight: screenHeight,
+                                                selectedCardColour: selectedCardColour,
+                                                song: song,
+                                                currentSong: false,
+                                                scrollController: scrollController
+                                              ),
                                           ),]
                                         ),
                                       ),

@@ -15,7 +15,7 @@ import 'songInteraction.dart';
 2 variations of cards, a normal one with song name, artist name, album cover and a song currently playing which has skip/pause buttons and other info such as length of a song and such 
                                                         - - - - - - - - - - - */
 Padding SongCard( void Function(VoidCallback) setState,
-  {albumCoverSize, cardColour, cardWidth, currentSongIndex, index, screenHeight, selectedCardColour, song, currentSong}
+  {albumCoverSize, cardColour, cardWidth, currentSongIndex, index, screenHeight, selectedCardColour, song, currentSong, scrollController}
 
 ) {
   return Padding(
@@ -33,7 +33,7 @@ Padding SongCard( void Function(VoidCallback) setState,
             SizedBox(height: screenHeight*0.6*0.08*0.6),
 
 
-            displayAlbumCover(song, currentSong, screenHeight),
+            displayAlbumCover(song, currentSong, screenHeight, albumCoverSize, "song"),
             
 
             // SONG NAME + ARTIST NAME
@@ -76,7 +76,7 @@ Padding SongCard( void Function(VoidCallback) setState,
                     children: [
                       // GO BACK TO A PREVIOUS SONG
                       IconButtonStyles.trasnferIconButton(
-                        action: () {prevNextSong("prev", setState);}, 
+                        action: () {prevNextSong("prev", setState, scrollController);}, 
                         icon: Icon(Icons.skip_previous_rounded)
                       ),
 
@@ -98,7 +98,7 @@ Padding SongCard( void Function(VoidCallback) setState,
                   
                       // SKIP TO THE NEXT SONG IN THE QUEUE
                       IconButtonStyles.trasnferIconButton(
-                        action: () {prevNextSong("next", setState);}, 
+                        action: () {prevNextSong("next", setState, scrollController);}, 
                         icon: Icon(Icons.skip_next_rounded)
                       ),
                     ],
@@ -141,7 +141,7 @@ Padding SongCard( void Function(VoidCallback) setState,
           )
         ),
         // GO TO THE NEXT SONG IF THE ONE PLAYING HAS ENDED
-        checkSongEnded(setState)
+        checkSongEnded(setState, scrollController)
     ],),
   );
 }

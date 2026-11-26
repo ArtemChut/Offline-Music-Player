@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 
 import 'songInteraction.dart';
 
@@ -7,28 +8,26 @@ import '../SongsCataloguePage.dart';
 bool changed = false;
 
 // CHECKING IF SONG HAS COME TO AN END
-StreamBuilder checkSongEnded(void Function(VoidCallback) setState) {
+StreamBuilder checkSongEnded(void Function(VoidCallback) setState, scrollController) {
   return // CHECKING IF SONG HAS COME TO AN END
-    StreamBuilder<Duration> ( 
-      stream: audioPlayer.positionStream,
+    StreamBuilder<PlayerState>(
+      stream: audioPlayer.playerStateStream,
       builder: (context, snapshot) {
-        final position = snapshot.data ?? Duration.zero;
-  
-        if (audioPlayer.duration != null) {
-          if (position >= audioPlayer.duration! && !changed && position.toString() != "0:00:00.000000") {
-            changed = true;
-  
-            WidgetsBinding.instance.addPostFrameCallback((_) { // play the next song in the queue (first one if out of songs)
-              prevNextSong("next", setState);
-            });
-          }
-  
-          if (position < audioPlayer.duration!) {
-            changed = false;
-          }
+
+        final playerState = snapshot.data;
+
+        if (playerState != null &&
+            playerState.processingState == ProcessingState.completed &&
+            !changed) {
+
+          changed = true;
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            prevNextSong("next", setState, scrollController);
+          });
         }
-  
-        return const SizedBox(); // must return something so add an empty box
+
+        return const SizedBox();
       },
     );
 }

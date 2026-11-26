@@ -55,3 +55,17 @@ Future<void> saveScrollBarPos(double x) async {
     x
   );
 }
+
+// saving all the plalists
+Future<void> saveAllPlaylists() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  await prefs.setString(
+    KConstant.allPlaylistsKey,
+    jsonEncode(
+      allPlaylistsNotifier.value
+          .map((playlist) => playlist.toJson())
+          .toList()
+    ),
+  );
+}

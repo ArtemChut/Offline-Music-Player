@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:music_player/sideFiles/playlists.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../consts/constants.dart';
@@ -37,4 +38,19 @@ Future<void> initLoadTimePlayed() async {
 Future<void> initLoadScrollBarPos() async {
   final prefs = await SharedPreferences.getInstance();
   scrollBarPosNotifier.value = prefs.getDouble(KConstant.scrollBarPosKey) ?? 0;
+}
+
+// all the plalists 
+Future<void> initLoadPlaylists() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  final jsonString = prefs.getString(KConstant.allPlaylistsKey);
+
+  if (jsonString == null) return;
+
+  final List<dynamic> decoded = jsonDecode(jsonString);
+
+  allPlaylistsNotifier.value = decoded
+      .map((playlist) => Playlist.fromJson(playlist))
+      .toList();
 }

@@ -57,7 +57,7 @@ Future<void> changeSongProps(String type, song, BuildContext context, void Funct
 
 
 const allowed = [".svg", ".png", ".jpg"];
-Future<void> changeAlbumCover(song, void Function(VoidCallback) setState) async {
+Future<void> changeAlbumCover(object, void Function(VoidCallback) setState) async {
   // allowing user to pick any image file
   final result = await FilePicker.platform.pickFiles(type: FileType.image);
 
@@ -77,8 +77,9 @@ Future<void> changeAlbumCover(song, void Function(VoidCallback) setState) async 
   if (!allowed.contains(fileExtension)) return;
 
 
-  song.alteredAlbumCoverPath = result.paths[0];
+  object.alteredAlbumCoverPath = result.paths[0];
   await saveAllSongs();
+  await saveAllPlaylists();
 
   // updating the ui
   setState((){});

@@ -34,7 +34,7 @@ class SettingsPage extends StatelessWidget {
 
       // BOTTOM NAV BAR TO TRANSFER BETWEEN PAGES
       bottomNavigationBar: BottomNavBar(
-        currentIndex: 2
+        currentIndex: 3
       )
     );
   }
