@@ -220,7 +220,8 @@ class _PlatlistsPage extends State<PlaylistsPage> {
                             cardColour,
                             cardBackgroundColour,
                             screenHeight,
-                            setState                        
+                            setState,
+                            context                        
                           )
                           
                         else

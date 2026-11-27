@@ -25,7 +25,7 @@ Padding PlaylistCard( void Function(VoidCallback) setState,
             SizedBox(height: screenHeight*0.6*0.08*0.6),
 
 
-            displayAlbumCover(playlist, false, screenHeight, albumCoverSize, "playlist"),
+            displayAlbumCover(playlist, false, screenHeight, albumCoverSize, "song"), // making it behagve like a song so that instead of an "add" icon, we display image assigned to a playlist
             
             Text("Total of ${playlist.songsInside.length} songs inside")
           ],
